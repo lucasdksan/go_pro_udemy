@@ -9,6 +9,10 @@ Curso da Udemy sobre Desenvolvimento Web com Go - Do Zero ao Deploy
 1. [Introdução](#introdução)
 2. [Mux](/notes/mux.md#mux)
     * [Manipulando Requisições HTTP no Go](/notes/mux.md#manipulando-requisições-http-no-go)
+3. [Organização de Pastas](/notes/structure.md#organização-de-pastas)
+    * [Importância de uma Estrutura de Pastas](/notes/structure.md#importância-de-uma-estrutura-de-pastas)
+    * [Como Estruturar Pastas de um Projeto](/notes/structure.md#como-estruturar-pastas-de-um-projeto)
+    * [Componentes Importantes](/notes/structure.md#componentes-importantes)
 
 ## Introdução
 

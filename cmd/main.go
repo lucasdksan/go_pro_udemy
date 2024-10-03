@@ -10,13 +10,20 @@ func noteList(w http.ResponseWriter, r *http.Request) {
 }
 
 func noteView(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+
+	if id == "" {
+		http.Error(w, "Note not found", http.StatusNotFound)
+		return
+	}
+
 	fmt.Fprint(w, "Visualizar uma Nota")
 }
 
 func noteCreate(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		w.Header().Set("Allow", "POST")
-		w.WriteHeader(http.StatusMethodNotAllowed)
+	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", http.MethodPost)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	fmt.Fprint(w, "Criar uma Nota")
