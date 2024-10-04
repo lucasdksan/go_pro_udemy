@@ -12,26 +12,13 @@
     <title>{{ template "title" . }} - QuickNotes</title>
 </head>
 <body>
-    <header>
-        <div class="wrapper">
-            <h1><a href="/">Quicknotes</a></h1>
-        </div>
-        <nav>
-            <div class="wrapper">
-                <a href="/">Home</a>
-            </div>
-        </nav>
-    </header>
+    {{ template "header" }}
     <main>
         <div class="wrapper">
             {{ template "main" . }}
         </div>
     </main>
-    <footer>
-        <div class="wrapper">
-            &copy;2023 por Lucas da Silva. Todos os direitos reservados.
-        </div>
-    </footer>
+    {{ template "footer" }}
 </body>
 </html>
 

@@ -13,6 +13,8 @@ func noteList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	files := []string{
+		"views/components/footer.html",
+		"views/components/header.html",
 		"views/components/layout.html",
 		"views/templates/home.html",
 	}
@@ -28,6 +30,8 @@ func noteList(w http.ResponseWriter, r *http.Request) {
 func noteView(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 	files := []string{
+		"views/components/footer.html",
+		"views/components/header.html",
 		"views/components/layout.html",
 		"views/templates/note-view.html",
 	}
