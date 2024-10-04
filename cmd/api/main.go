@@ -2,22 +2,43 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 )
 
 func noteList(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Listagem de Notas")
+	files := []string{
+		"views/components/layout.html",
+		"views/templates/note-view.html",
+	}
+	t, err := template.ParseFiles(files...)
+
+	if err != nil {
+		http.Error(w, "Error executing this page", http.StatusInternalServerError)
+	}
+
+	t.ExecuteTemplate(w, "layout", nil)
 }
 
 func noteView(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
+	files := []string{
+		"views/components/layout.html",
+		"views/templates/note-view.html",
+	}
 
 	if id == "" {
 		http.Error(w, "Note not found", http.StatusNotFound)
 		return
 	}
 
-	fmt.Fprint(w, "Visualizar uma Nota")
+	t, err := template.ParseFiles(files...)
+
+	if err != nil {
+		http.Error(w, "Error executing this page", http.StatusInternalServerError)
+	}
+
+	t.ExecuteTemplate(w, "layout", id)
 }
 
 func noteCreate(w http.ResponseWriter, r *http.Request) {

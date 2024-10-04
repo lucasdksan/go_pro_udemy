@@ -13,6 +13,10 @@ Curso da Udemy sobre Desenvolvimento Web com Go - Do Zero ao Deploy
     * [Importância de uma Estrutura de Pastas](/notes/structure.md#importância-de-uma-estrutura-de-pastas)
     * [Como Estruturar Pastas de um Projeto](/notes/structure.md#como-estruturar-pastas-de-um-projeto)
     * [Componentes Importantes](/notes/structure.md#componentes-importantes)
+4. [SSR vs CSR](/notes/side_render.md#server-side-render-vs-client-side-render)
+    * [SSR (Server-Side Rendering)](/notes/side_render.md#ssr-server-side-rendering)
+    * [CSR (Client-Side Rendering)](/notes/side_render.md#csr-client-side-rendering)
+    * [Templates](/notes/side_render.md#templates)
 
 ## Introdução
 
