@@ -16,7 +16,14 @@ Curso da Udemy sobre Desenvolvimento Web com Go - Do Zero ao Deploy
 4. [SSR vs CSR](/notes/side_render.md#server-side-render-vs-client-side-render)
     * [SSR (Server-Side Rendering)](/notes/side_render.md#ssr-server-side-rendering)
     * [CSR (Client-Side Rendering)](/notes/side_render.md#csr-client-side-rendering)
-    * [Templates](/notes/side_render.md#templates)
+5. [Templates](/notes/template.md#templates)
+    * [O Pacote html/template](/notes/template.md#o-pacote-htmltemplate)
+    * [Reuso de Templates com template](/notes/template.md#reuso-de-templates-com-template)
+    * [Renderização de Dados Dinâmicos](/notes/template.md#renderização-de-dados-dinâmicos)
+    * [Funções Personalizadas nos Templates](/notes/template.md#funções-personalizadas-nos-templates)
+    * [Segurança ao Renderizar HTML](/notes/template.md#segurança-ao-renderizar-html)
+    * [Desempenho e Cache de Templates](/notes/template.md#desempenho-e-cache-de-templates)
+    * [Aplicações com SSR em Golang](/notes/template.md#aplicações-com-ssr-em-golang)
 
 ## Introdução
 

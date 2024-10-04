@@ -7,9 +7,14 @@ import (
 )
 
 func noteList(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+
 	files := []string{
 		"views/components/layout.html",
-		"views/templates/note-view.html",
+		"views/templates/home.html",
 	}
 	t, err := template.ParseFiles(files...)
 
@@ -55,7 +60,10 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/notes", noteList)
+	staticHandler := http.FileServer(http.Dir("./assets/"))
+	mux.Handle("/assets/", http.StripPrefix("/assets/", staticHandler))
+
+	mux.HandleFunc("/", noteList)
 	mux.HandleFunc("/notes/view", noteView)
 	mux.HandleFunc("/notes/create", noteCreate)
 
