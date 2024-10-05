@@ -24,7 +24,13 @@ Curso da Udemy sobre Desenvolvimento Web com Go - Do Zero ao Deploy
     * [Segurança ao Renderizar HTML](/notes/template.md#segurança-ao-renderizar-html)
     * [Desempenho e Cache de Templates](/notes/template.md#desempenho-e-cache-de-templates)
     * [Aplicações com SSR em Golang](/notes/template.md#aplicações-com-ssr-em-golang)
-
+6. [Configurações](/notes/config.md#configurações)
+    * [Variáveis de Ambiente](/notes/config.md#variáveis-de-ambiente)
+    * [Arquivo .env](/notes/config.md#arquivo-env)
+    * [Arquivos de Configuração JSON](/notes/config.md#arquivos-de-configuração-json)
+    * [Arquivos .properties](/notes/config.md#arquivos-properties)
+    * [Gerenciamento de Configurações por Ambiente (Development, Staging, Production)](/notes/config.md#gerenciamento-de-configurações-por-ambiente-development-staging-production)
+    * [Gerenciamento Avançado com Viper](/notes/config.md#gerenciamento-avançado-com-viper)
 ## Introdução
 
 Ao usar Golang (Go) como backend ou API, uma das suas maiores vantagens é a simplicidade e o desempenho elevado que a linguagem proporciona. A biblioteca padrão de Go já oferece todas as ferramentas necessárias para criar servidores HTTP, permitindo manipular rotas, métodos, middlewares e interações com banco de dados de maneira direta e eficiente.
