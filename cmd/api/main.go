@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go_pro/config"
 	"html/template"
 	"net/http"
 )
@@ -60,7 +61,8 @@ func noteCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	fmt.Println("Servidor rodando na porta 5000")
+	config := config.LoadConfig()
+	fmt.Printf("Servidor rodando na porta %s\n", config.ServerPort)
 
 	mux := http.NewServeMux()
 
@@ -71,7 +73,9 @@ func main() {
 	mux.HandleFunc("/notes/view", noteView)
 	mux.HandleFunc("/notes/create", noteCreate)
 
-	if err := http.ListenAndServe(":5050", mux); err != nil {
+	port := fmt.Sprintf(":%s", config.ServerPort)
+
+	if err := http.ListenAndServe(port, mux); err != nil {
 		panic("Server Error!")
 	}
 }
