@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"go_pro/config"
+	"go_pro/internal/logger"
 	"html/template"
+	"log/slog"
 	"net/http"
+	"os"
 )
 
 func noteList(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +65,11 @@ func noteCreate(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	config := config.LoadConfig()
-	fmt.Printf("Servidor rodando na porta %s\n", config.ServerPort)
+	log := logger.NewLogger(os.Stderr, config.GetLevelLog())
+
+	slog.SetDefault(log)
+
+	slog.Info(fmt.Sprintf("Servidor rodando na porta %s\n", config.ServerPort))
 
 	mux := http.NewServeMux()
 
