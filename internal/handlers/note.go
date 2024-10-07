@@ -12,10 +12,9 @@ func NewNoteHandler() *noteHandler {
 	return &noteHandler{}
 }
 
-func (nh *noteHandler) NoteList(w http.ResponseWriter, r *http.Request) {
+func (nh *noteHandler) NoteList(w http.ResponseWriter, r *http.Request) error {
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
+		return ErrorNotFound("page not found")
 	}
 
 	files := []string{
@@ -27,13 +26,17 @@ func (nh *noteHandler) NoteList(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles(files...)
 
 	if err != nil {
-		http.Error(w, "Error executing this page", http.StatusInternalServerError)
+		return ErrorInternalServer("Error executing this page")
 	}
 
-	t.ExecuteTemplate(w, "layout", nil)
+	if err = t.ExecuteTemplate(w, "layout", nil); err != nil {
+		return ErrorInternalServer("error in template")
+	}
+
+	return nil
 }
 
-func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) {
+func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) error {
 	id := r.URL.Query().Get("id")
 	files := []string{
 		"views/components/footer.html",
@@ -43,17 +46,20 @@ func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if id == "" {
-		http.Error(w, "Note not found", http.StatusNotFound)
-		return
+		return ErrorBadRequest("note not found")
 	}
 
 	t, err := template.ParseFiles(files...)
 
 	if err != nil {
-		http.Error(w, "Error executing this page", http.StatusInternalServerError)
+		return ErrorInternalServer("error executing this page")
 	}
 
-	t.ExecuteTemplate(w, "layout", id)
+	if err = t.ExecuteTemplate(w, "layout", id); err != nil {
+		return ErrorInternalServer("error in template")
+	}
+
+	return nil
 }
 
 func (nh *noteHandler) NoteCreate(w http.ResponseWriter, r *http.Request) {

@@ -21,8 +21,8 @@ func main() {
 	slog.SetDefault(log)
 	slog.Info(fmt.Sprintf("Servidor rodando na porta %s\n", config.ServerPort))
 	mux.Handle("/assets/", http.StripPrefix("/assets/", staticHandler))
-	mux.HandleFunc("/", noteHandlers.NoteList)
-	mux.HandleFunc("/notes/view", noteHandlers.NoteView)
+	mux.Handle("/", handlers.HandlerWithError(noteHandlers.NoteList))
+	mux.Handle("/notes/view", handlers.HandlerWithError(noteHandlers.NoteView))
 	mux.HandleFunc("/notes/create", noteHandlers.NoteCreate)
 
 	if err := http.ListenAndServe(port, mux); err != nil {
