@@ -31,6 +31,17 @@ Curso da Udemy sobre Desenvolvimento Web com Go - Do Zero ao Deploy
     * [Arquivos .properties](/notes/config.md#arquivos-properties)
     * [Gerenciamento de Configurações por Ambiente (Development, Staging, Production)](/notes/config.md#gerenciamento-de-configurações-por-ambiente-development-staging-production)
     * [Gerenciamento Avançado com Viper](/notes/config.md#gerenciamento-avançado-com-viper)
+7. [Logs](/notes/logs.md#logs)
+    * [Importância dos Logs](/notes/logs.md#importância-dos-logs)
+    * [Tipos de Logs](/notes/logs.md#tipos-de-logs)
+    * [Ferramentas de Logging no Go](/notes/logs.md#ferramentas-de-logging-no-go)
+        1. [Pacote Padrão log](/notes/logs.md#pacote-padrão-log)
+        2. [Pacote slog (Go 1.21)](/notes/logs.md#pacote-slog-go-121)
+        3. [Pacotes de Logging Populares](/notes/logs.md#pacotes-de-logging-populares)
+    * [Boas Práticas de Logging](/notes/logs.md#boas-práticas-de-logging)
+    * [Logging em Ambientes de Produção e Desenvolvimento](/notes/logs.md#logging-em-ambientes-de-produção-e-desenvolvimento)
+    * [Integração com Ferramentas de Monitoramento e Observabilidade](/notes/logs.md#integração-com-ferramentas-de-monitoramento-e-observabilidade)
+
 ## Introdução
 
 Ao usar Golang (Go) como backend ou API, uma das suas maiores vantagens é a simplicidade e o desempenho elevado que a linguagem proporciona. A biblioteca padrão de Go já oferece todas as ferramentas necessárias para criar servidores HTTP, permitindo manipular rotas, métodos, middlewares e interações com banco de dados de maneira direta e eficiente.
