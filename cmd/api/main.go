@@ -22,19 +22,18 @@ func main() {
 	db, err := database.LoadDataBase(config.DBConnURL)
 
 	if err != nil {
+		slog.Error("Failed connection db", "error", err)
 		panic("Server Error!")
 	}
 
 	noteRepo := repositories.NewNoteRepository(db)
 
-	notes, err := noteRepo.List()
+	err = noteRepo.Delete(7)
 
 	if err != nil {
 		slog.Error("Failed to list notes", "error", err)
 		panic("Server Error!")
 	}
-
-	fmt.Println(notes)
 
 	slog.SetDefault(log)
 	slog.Info(fmt.Sprintf("Servidor rodando na porta %s\n", config.ServerPort))
@@ -44,6 +43,7 @@ func main() {
 	mux.HandleFunc("/notes/create", noteHandlers.NoteCreate)
 
 	if err = http.ListenAndServe(port, mux); err != nil {
+		slog.Error("Server Error", "error", err)
 		panic("Server Error!")
 	}
 }

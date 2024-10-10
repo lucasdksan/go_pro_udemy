@@ -1,14 +1,20 @@
-version: "3.1"
+version: '3.8'
+
 services:
     db:
-        build: .
-        container_name: api-db
+        image: postgres
         restart: always
-        tty: true
-        ports:
-            - "5432:5432"
-        volumes:
-            - .docker/dbdata:/var/lib/postgresql/data
+        container_name: go_pro_udemy
         environment:
+            - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=docker
             - POSTGRES_DB=goweb
+        ports:
+            - '5432:5432'
+        volumes:
+            - .docker/dbdata:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres -d goweb'",]
+            interval: 10s
+            timeout: 3s
+            retries: 3

@@ -8,9 +8,22 @@ import (
 )
 
 func LoadDataBase(url string) (*pgxpool.Pool, error) {
-	dbpool, err := pgxpool.New(context.Background(), url)
+	config, err := pgxpool.ParseConfig(url)
 
 	if err != nil {
+		slog.Info("Unable to parse connection URL")
+		return nil, err
+	}
+
+	dbpool, err := pgxpool.NewWithConfig(context.Background(), config)
+
+	if err != nil {
+		slog.Info("Unable to create pool")
+		return nil, err
+	}
+
+	if err = dbpool.Ping(context.Background()); err != nil {
+		slog.Info("Unable to ping database")
 		return nil, err
 	}
 

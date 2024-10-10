@@ -2,14 +2,22 @@ package repositories
 
 import (
 	"context"
-	"go_pro/internal/database"
+	"go_pro/internal/apperrors"
+	"go_pro/internal/database/querys"
 	"go_pro/internal/models"
+	"math/big"
+	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type NoteRepository interface {
 	List() ([]models.Note, error)
+	GetById(id int) (*models.Note, error)
+	Create(title, content, color string) (*models.Note, error)
+	Update(id int, title, content, color string) (*models.Note, error)
+	Delete(id int) error
 }
 
 type noteRepository struct {
@@ -19,10 +27,10 @@ type noteRepository struct {
 func (nr *noteRepository) List() ([]models.Note, error) {
 	var list []models.Note
 
-	rows, err := nr.db.Query(context.Background(), database.ListNoteQuery)
+	rows, err := nr.db.Query(context.Background(), querys.ListNoteQuery)
 
 	if err != nil {
-		return nil, err
+		return nil, apperrors.NewRepositoryError(err)
 	}
 
 	defer rows.Close()
@@ -33,14 +41,94 @@ func (nr *noteRepository) List() ([]models.Note, error) {
 		if err = rows.Scan(
 			&row.Id, &row.Title,
 			&row.Content, &row.Color,
-			&row.CreatedAt); err != nil {
-			return nil, err
+			&row.CreatedAt, &row.UpdatedAt); err != nil {
+			return nil, apperrors.NewRepositoryError(err)
 		}
 
 		list = append(list, row)
 	}
 
 	return list, nil
+}
+
+func (nr *noteRepository) GetById(id int) (*models.Note, error) {
+	var note models.Note
+
+	row := nr.db.QueryRow(context.Background(), querys.GetByIdNoteQuery, id)
+
+	if err := row.Scan(&note.Id, &note.Title,
+		&note.Content, &note.Color,
+		&note.CreatedAt, &note.UpdatedAt); err != nil {
+		return &note, apperrors.NewRepositoryError(err)
+	}
+
+	return &note, nil
+}
+
+func (nr *noteRepository) Create(title, content, color string) (*models.Note, error) {
+	var note models.Note
+
+	note.Title = pgtype.Text{String: title, Valid: true}
+	note.Content = pgtype.Text{String: content, Valid: true}
+	note.Color = pgtype.Text{String: content, Valid: true}
+
+	row := nr.db.QueryRow(context.Background(), querys.CreateNoteQuery, note.Title, note.Content, note.Color)
+
+	if err := row.Scan(&note.Id, &note.CreatedAt); err != nil {
+		return &models.Note{}, apperrors.NewRepositoryError(err)
+	}
+
+	return &note, nil
+}
+
+func (nr *noteRepository) Update(id int, title, content, color string) (*models.Note, error) {
+	var note models.Note
+
+	var titleValue, contentValue, colorValue, updatedAtValue interface{}
+
+	if len(title) > 0 {
+		titleValue = title
+	} else {
+		titleValue = nil
+	}
+
+	if len(content) > 0 {
+		contentValue = content
+	} else {
+		contentValue = nil
+	}
+
+	if len(color) > 0 {
+		colorValue = color
+	} else {
+		colorValue = nil
+	}
+
+	updatedAtValue = time.Now()
+
+	_, err := nr.db.Exec(context.Background(), querys.UpdateNoteQuery, titleValue, contentValue, colorValue, updatedAtValue, id)
+
+	if err != nil {
+		return &models.Note{}, apperrors.NewRepositoryError(err)
+	}
+
+	note.Title = pgtype.Text{String: title, Valid: true}
+	note.Content = pgtype.Text{String: content, Valid: true}
+	note.Color = pgtype.Text{String: color, Valid: true}
+	note.UpdatedAt = pgtype.Date{Time: time.Now(), Valid: true}
+	note.Id = pgtype.Numeric{Int: big.NewInt(int64(id))}
+
+	return &note, nil
+}
+
+func (nr *noteRepository) Delete(id int) error {
+	_, err := nr.db.Exec(context.Background(), querys.DeleteNoteQuery, id)
+
+	if err != nil {
+		return apperrors.NewRepositoryError(err)
+	}
+
+	return nil
 }
 
 func NewNoteRepository(db *pgxpool.Pool) NoteRepository {

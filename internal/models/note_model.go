@@ -1,12 +1,14 @@
 package models
 
-import "time"
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 type Note struct {
-	Id        int
-	Title     string
-	Content   string
-	Color     string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Id        pgtype.Numeric
+	Title     pgtype.Text
+	Content   pgtype.Text
+	Color     pgtype.Text
+	CreatedAt pgtype.Date
+	UpdatedAt pgtype.Date
 }

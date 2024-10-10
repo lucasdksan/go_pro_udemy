@@ -103,5 +103,7 @@ func LoadConfig() Config {
 
 	config.validate()
 
+	fmt.Println(config.DBConnURL)
+
 	return config
 }
