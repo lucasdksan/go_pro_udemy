@@ -2,7 +2,7 @@ package querys
 
 var (
 	ListNoteQuery string = `
-		select id, title, content, color, created_at from notes;
+		select id, title, content, color, created_at, updated_at from notes;
 	`
 	GetByIdNoteQuery string = `
 		select * from notes where id=$1

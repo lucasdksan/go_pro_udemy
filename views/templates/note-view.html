@@ -1,7 +1,7 @@
-{{ define "title" }} View Page {{ .Id.Int }} {{ end }}
+{{ define "title" }} View Page {{ .Id }} {{ end }}
 {{ define "main" }}
 <div>
-    <h3>Esta é a nota {{ .Title.String }}</h3>
-    <p>{{ .Content.String }}</p>
+    <h3>Esta é a nota {{ .Title }}</h3>
+    <p>{{ .Content }}</p>
 </div>
 {{ end }}

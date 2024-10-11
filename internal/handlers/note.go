@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"bytes"
 	"fmt"
+	"go_pro/internal/dtos"
 	"go_pro/internal/repositories"
 	"net/http"
 	"strconv"
@@ -33,7 +35,13 @@ func (nh *noteHandler) NoteList(w http.ResponseWriter, r *http.Request) error {
 		return ErrorInternalServer("Error executing this page")
 	}
 
-	if err = t.ExecuteTemplate(w, "layout", nil); err != nil {
+	notes, err := nh.repo.List()
+
+	if err != nil {
+		return err
+	}
+
+	if err = t.ExecuteTemplate(w, "layout", dtos.NewNoteResponseFromNoteList(notes)); err != nil {
 		return ErrorInternalServer("error in template")
 	}
 
@@ -71,9 +79,13 @@ func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	if err = t.ExecuteTemplate(w, "layout", note); err != nil {
+	buff := &bytes.Buffer{}
+
+	if err = t.ExecuteTemplate(buff, "layout", dtos.NewNoteResponseFromNote(note)); err != nil {
 		return ErrorInternalServer("error in template")
 	}
+
+	buff.WriteTo(w)
 
 	return nil
 }
