@@ -15,7 +15,6 @@ import (
 func main() {
 	config := config.LoadConfig()
 	log := loggers.NewLogger(os.Stderr, config.GetLevelLog())
-	noteHandlers := handlers.NewNoteHandler()
 	mux := http.NewServeMux()
 	staticHandler := http.FileServer(http.Dir("./assets/"))
 	port := fmt.Sprintf(":%s", config.ServerPort)
@@ -27,6 +26,7 @@ func main() {
 	}
 
 	noteRepo := repositories.NewNoteRepository(db)
+	noteHandlers := handlers.NewNoteHandler(noteRepo)
 
 	err = noteRepo.Delete(7)
 

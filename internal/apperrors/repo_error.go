@@ -5,5 +5,5 @@ type RepositoryError struct {
 }
 
 func NewRepositoryError(err error) error {
-	return &RepositoryError{error: err}
+	return RepositoryError{error: err}
 }

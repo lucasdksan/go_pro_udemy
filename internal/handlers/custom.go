@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"go_pro/internal/apperrors"
+	"log/slog"
 	"net/http"
 	"text/template"
 )
@@ -24,6 +25,7 @@ type HandlerWithError func(w http.ResponseWriter, r *http.Request) error
 func (f HandlerWithError) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err := f(w, r); err != nil {
 		var statusError apperrors.StatusError
+		var repoError apperrors.RepositoryError
 
 		if errors.As(err, &statusError) {
 			if statusError.HTTPStatus() == http.StatusNotFound {
@@ -46,6 +48,12 @@ func (f HandlerWithError) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			}
 
 			http.Error(w, err.Error(), statusError.HTTPStatus())
+			return
+		}
+
+		if errors.As(err, &repoError) {
+			slog.Error(err.Error())
+			http.Error(w, "an error occurred while executing this operation", http.StatusInternalServerError)
 			return
 		}
 

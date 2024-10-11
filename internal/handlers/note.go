@@ -2,14 +2,18 @@ package handlers
 
 import (
 	"fmt"
+	"go_pro/internal/repositories"
 	"net/http"
+	"strconv"
 	"text/template"
 )
 
-type noteHandler struct{}
+type noteHandler struct {
+	repo repositories.NoteRepository
+}
 
-func NewNoteHandler() *noteHandler {
-	return &noteHandler{}
+func NewNoteHandler(repo repositories.NoteRepository) *noteHandler {
+	return &noteHandler{repo: repo}
 }
 
 func (nh *noteHandler) NoteList(w http.ResponseWriter, r *http.Request) error {
@@ -37,7 +41,7 @@ func (nh *noteHandler) NoteList(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) error {
-	id := r.URL.Query().Get("id")
+	idParam := r.URL.Query().Get("id")
 	files := []string{
 		"views/components/footer.html",
 		"views/components/header.html",
@@ -45,8 +49,14 @@ func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) error {
 		"views/templates/note-view.html",
 	}
 
-	if id == "" {
+	if idParam == "" {
 		return ErrorBadRequest("note not found")
+	}
+
+	id, err := strconv.Atoi(idParam)
+
+	if err != nil {
+		return err
 	}
 
 	t, err := template.ParseFiles(files...)
@@ -55,7 +65,13 @@ func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) error {
 		return ErrorInternalServer("error executing this page")
 	}
 
-	if err = t.ExecuteTemplate(w, "layout", id); err != nil {
+	note, err := nh.repo.GetById(id)
+
+	if err != nil {
+		return err
+	}
+
+	if err = t.ExecuteTemplate(w, "layout", note); err != nil {
 		return ErrorInternalServer("error in template")
 	}
 
