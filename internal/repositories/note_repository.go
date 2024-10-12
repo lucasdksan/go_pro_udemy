@@ -13,21 +13,21 @@ import (
 )
 
 type NoteRepository interface {
-	List() ([]models.Note, error)
-	GetById(id int) (*models.Note, error)
-	Create(title, content, color string) (*models.Note, error)
-	Update(id int, title, content, color string) (*models.Note, error)
-	Delete(id int) error
+	List(ctx context.Context) ([]models.Note, error)
+	GetById(ctx context.Context, id int) (*models.Note, error)
+	Create(ctx context.Context, title, content, color string) (*models.Note, error)
+	Update(ctx context.Context, id int, title, content, color string) (*models.Note, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type noteRepository struct {
 	db *pgxpool.Pool
 }
 
-func (nr *noteRepository) List() ([]models.Note, error) {
+func (nr *noteRepository) List(ctx context.Context) ([]models.Note, error) {
 	var list []models.Note
 
-	rows, err := nr.db.Query(context.Background(), querys.ListNoteQuery)
+	rows, err := nr.db.Query(ctx, querys.ListNoteQuery)
 
 	if err != nil {
 		return nil, apperrors.NewRepositoryError(err)
@@ -51,10 +51,10 @@ func (nr *noteRepository) List() ([]models.Note, error) {
 	return list, nil
 }
 
-func (nr *noteRepository) GetById(id int) (*models.Note, error) {
+func (nr *noteRepository) GetById(ctx context.Context, id int) (*models.Note, error) {
 	var note models.Note
 
-	row := nr.db.QueryRow(context.Background(), querys.GetByIdNoteQuery, id)
+	row := nr.db.QueryRow(ctx, querys.GetByIdNoteQuery, id)
 
 	if err := row.Scan(&note.Id, &note.Title,
 		&note.Content, &note.Color,
@@ -65,14 +65,14 @@ func (nr *noteRepository) GetById(id int) (*models.Note, error) {
 	return &note, nil
 }
 
-func (nr *noteRepository) Create(title, content, color string) (*models.Note, error) {
+func (nr *noteRepository) Create(ctx context.Context, title, content, color string) (*models.Note, error) {
 	var note models.Note
 
 	note.Title = pgtype.Text{String: title, Valid: true}
 	note.Content = pgtype.Text{String: content, Valid: true}
 	note.Color = pgtype.Text{String: content, Valid: true}
 
-	row := nr.db.QueryRow(context.Background(), querys.CreateNoteQuery, note.Title, note.Content, note.Color)
+	row := nr.db.QueryRow(ctx, querys.CreateNoteQuery, note.Title, note.Content, note.Color)
 
 	if err := row.Scan(&note.Id, &note.CreatedAt); err != nil {
 		return &models.Note{}, apperrors.NewRepositoryError(err)
@@ -81,7 +81,7 @@ func (nr *noteRepository) Create(title, content, color string) (*models.Note, er
 	return &note, nil
 }
 
-func (nr *noteRepository) Update(id int, title, content, color string) (*models.Note, error) {
+func (nr *noteRepository) Update(ctx context.Context, id int, title, content, color string) (*models.Note, error) {
 	var note models.Note
 
 	var titleValue, contentValue, colorValue, updatedAtValue interface{}
@@ -106,7 +106,7 @@ func (nr *noteRepository) Update(id int, title, content, color string) (*models.
 
 	updatedAtValue = time.Now()
 
-	_, err := nr.db.Exec(context.Background(), querys.UpdateNoteQuery, titleValue, contentValue, colorValue, updatedAtValue, id)
+	_, err := nr.db.Exec(ctx, querys.UpdateNoteQuery, titleValue, contentValue, colorValue, updatedAtValue, id)
 
 	if err != nil {
 		return &models.Note{}, apperrors.NewRepositoryError(err)
@@ -121,8 +121,8 @@ func (nr *noteRepository) Update(id int, title, content, color string) (*models.
 	return &note, nil
 }
 
-func (nr *noteRepository) Delete(id int) error {
-	_, err := nr.db.Exec(context.Background(), querys.DeleteNoteQuery, id)
+func (nr *noteRepository) Delete(ctx context.Context, id int) error {
+	_, err := nr.db.Exec(ctx, querys.DeleteNoteQuery, id)
 
 	if err != nil {
 		return apperrors.NewRepositoryError(err)

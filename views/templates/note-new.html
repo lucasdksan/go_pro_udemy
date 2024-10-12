@@ -1,7 +1,20 @@
 {{ define "title" }} Create Page {{ . }} {{ end }}
 {{ define "main" }}
-<div>
-    <h3>Esta é a nota {{ . }}</h3>
-    <p>Este é o conteúdo da anotação</p>
-</div>
+    <h1>Nova Anotação</h1>
+    <form action="/notes/create" method="post">
+        <fieldset>
+            <label for="title">Título</label>
+            <input type="text" name="title" id="title" />
+        </fieldset>
+
+        <fieldset>
+            <label for="content">Conteúdo</label>
+            <textarea name="content" id="content"></textarea>
+        </fieldset>
+
+        <fieldset>
+            <label for="color">Cor do Cartão</label>
+            <input type="text" name="color" id="color" />
+        </fieldset>
+    </form>
 {{ end }}

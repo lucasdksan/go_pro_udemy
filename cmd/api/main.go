@@ -28,19 +28,13 @@ func main() {
 	noteRepo := repositories.NewNoteRepository(db)
 	noteHandlers := handlers.NewNoteHandler(noteRepo)
 
-	err = noteRepo.Delete(7)
-
-	if err != nil {
-		slog.Error("Failed to list notes", "error", err)
-		panic("Server Error!")
-	}
-
 	slog.SetDefault(log)
 	slog.Info(fmt.Sprintf("Servidor rodando na porta %s\n", config.ServerPort))
 	mux.Handle("/assets/", http.StripPrefix("/assets/", staticHandler))
 	mux.Handle("/", handlers.HandlerWithError(noteHandlers.NoteList))
 	mux.Handle("/notes/view", handlers.HandlerWithError(noteHandlers.NoteView))
-	mux.HandleFunc("/notes/create", noteHandlers.NoteCreate)
+	mux.Handle("/notes/new", handlers.HandlerWithError(noteHandlers.NoteNew))
+	mux.Handle("/notes/create", handlers.HandlerWithError(noteHandlers.NoteCreate))
 
 	if err = http.ListenAndServe(port, mux); err != nil {
 		slog.Error("Server Error", "error", err)
