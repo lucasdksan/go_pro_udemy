@@ -198,6 +198,13 @@
         gap: 10px;
     }
 
+    fieldset {
+        border: none;
+        margin: 0px;
+        padding: 0px;
+        height: auto;
+    }
+
     label.error {
         color: var(--danger);
         display: block;

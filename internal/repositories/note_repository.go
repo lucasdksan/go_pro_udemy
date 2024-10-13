@@ -70,7 +70,7 @@ func (nr *noteRepository) Create(ctx context.Context, title, content, color stri
 
 	note.Title = pgtype.Text{String: title, Valid: true}
 	note.Content = pgtype.Text{String: content, Valid: true}
-	note.Color = pgtype.Text{String: content, Valid: true}
+	note.Color = pgtype.Text{String: color, Valid: true}
 
 	row := nr.db.QueryRow(ctx, querys.CreateNoteQuery, note.Title, note.Content, note.Color)
 

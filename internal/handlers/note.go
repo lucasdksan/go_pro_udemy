@@ -106,7 +106,7 @@ func (nh *noteHandler) NoteNew(w http.ResponseWriter, r *http.Request) error {
 		return ErrorInternalServer("error executing this page")
 	}
 
-	if err = t.ExecuteTemplate(w, "layout", nil); err != nil {
+	if err = t.ExecuteTemplate(w, "layout", dtos.NewNoteRequest()); err != nil {
 		return ErrorInternalServer("error in template")
 	}
 
@@ -134,7 +134,7 @@ func (nh *noteHandler) NoteCreate(w http.ResponseWriter, r *http.Request) error 
 		return err
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/note/view?id=%d", note.Id.Int), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/notes/view?id=%d", note.Id.Int), http.StatusSeeOther)
 
 	return nil
 }

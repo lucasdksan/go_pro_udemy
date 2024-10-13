@@ -1,12 +1,33 @@
 package dtos
 
-import "go_pro/internal/models"
+import (
+	"fmt"
+	"go_pro/internal/models"
+)
 
 type NoteResponse struct {
 	Id      int
 	Title   string
 	Content string
 	Color   string
+}
+
+type NoteRequest struct {
+	Id      int
+	Title   string
+	Content string
+	Color   string
+	Colors  []string
+}
+
+func NewNoteRequest() (req NoteRequest) {
+	req.Color = "color1"
+
+	for i := 1; i <= 9; i++ {
+		req.Colors = append(req.Colors, fmt.Sprintf("color%d", i))
+	}
+
+	return
 }
 
 func NewNoteResponseFromNote(note *models.Note) (res NoteResponse) {

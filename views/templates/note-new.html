@@ -9,12 +9,33 @@
 
         <fieldset>
             <label for="content">Conteúdo</label>
-            <textarea name="content" id="content"></textarea>
+            <textarea name="content" id="content" cols="30" rows="10"></textarea>
         </fieldset>
 
         <fieldset>
             <label for="color">Cor do Cartão</label>
-            <input type="text" name="color" id="color" />
+            <input type="hidden" name="color" id="color" value="{{ .Color }}" />
+            <div class="color-picker">
+                {{ $color := .Color }}
+                {{ range .Colors }}
+                    <div data-color="{{ . }}" class="color {{ . }} {{ if eq . $color }} active {{ end }}"></div>
+                {{ end }}
+            </div>
         </fieldset>
+
+        <div class="buttons">
+            <button class="success" type="submit">Salvar</button>
+            <button class="neutral">Cancelar</button>
+        </div>
     </form>
+{{ end }}
+
+{{ define "script" }}
+    <script>
+        $(".color").click(function () {
+            $(".color").removeClass("active");
+            $(this).addClass("active");
+            $("#color").val($(this).data("color"));
+        });
+    </script>
 {{ end }}
