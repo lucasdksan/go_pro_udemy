@@ -34,7 +34,7 @@ func main() {
 	mux.Handle("/", handlers.HandlerWithError(noteHandlers.NoteList))
 	mux.Handle("/notes/view", handlers.HandlerWithError(noteHandlers.NoteView))
 	mux.Handle("/notes/new", handlers.HandlerWithError(noteHandlers.NoteNew))
-	mux.Handle("/notes/create", handlers.HandlerWithError(noteHandlers.NoteCreate))
+	mux.Handle("/notes/save", handlers.HandlerWithError(noteHandlers.NoteSave))
 	mux.Handle("/notes/delete", handlers.HandlerWithError(noteHandlers.NoteDelete))
 	mux.Handle("/notes/update", handlers.HandlerWithError(noteHandlers.NoteEdit))
 

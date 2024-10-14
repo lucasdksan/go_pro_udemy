@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"go_pro/internal/apperrors"
 	"go_pro/internal/dtos"
+	"go_pro/internal/models"
 	"go_pro/internal/repositories"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type noteHandler struct {
@@ -29,8 +31,8 @@ func (nh *noteHandler) NoteList(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	if err = render(w, "home.html", dtos.NewNoteResponseFromNoteList(notes)); err != nil {
-		return ErrorInternalServer("error in template")
+	if err = render(w, "home.html", dtos.NewNoteResponseFromNoteList(notes), http.StatusOK); err != nil {
+		return err
 	}
 
 	return nil
@@ -55,22 +57,22 @@ func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	if err = render(w, "note-view.html", dtos.NewNoteCombined(note)); err != nil {
-		return ErrorInternalServer("error in template")
+	if err = render(w, "note-view.html", dtos.NewNoteResponseFromNote(note), http.StatusOK); err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func (nh *noteHandler) NoteNew(w http.ResponseWriter, r *http.Request) error {
-	if err := render(w, "note-new.html", dtos.NewNoteRequest()); err != nil {
-		return ErrorInternalServer("error in template")
+	if err := render(w, "note-new.html", dtos.NewNoteRequest(nil), http.StatusOK); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (nh *noteHandler) NoteCreate(w http.ResponseWriter, r *http.Request) error {
+func (nh *noteHandler) NoteSave(w http.ResponseWriter, r *http.Request) error {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
 
@@ -81,11 +83,40 @@ func (nh *noteHandler) NoteCreate(w http.ResponseWriter, r *http.Request) error 
 		return err
 	}
 
+	idParam := r.PostForm.Get("id")
+	id, _ := strconv.Atoi(idParam)
 	title := r.PostForm.Get("title")
 	content := r.PostForm.Get("content")
 	color := r.PostForm.Get("color")
+	data := dtos.NewNoteRequest(nil)
 
-	note, err := nh.repo.Create(r.Context(), title, content, color)
+	data.Color = color
+	data.Content = content
+	data.Title = title
+	data.Id = id
+
+	if strings.TrimSpace(content) == "" {
+		data.AddFieldError("content", "content is required")
+	}
+
+	if !data.Valid() {
+		if id > 0 {
+			render(w, "note-edit.html", data, http.StatusUnprocessableEntity)
+		} else {
+			render(w, "note-new.html", data, http.StatusUnprocessableEntity)
+		}
+
+		return nil
+	}
+
+	var note *models.Note
+	var err error
+
+	if id > 0 {
+		note, err = nh.repo.Update(r.Context(), id, title, content, color)
+	} else {
+		note, err = nh.repo.Create(r.Context(), title, content, color)
+	}
 
 	if err != nil {
 		return err
@@ -137,17 +168,15 @@ func (nh *noteHandler) NoteEdit(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	title := r.PostForm.Get("title")
-	content := r.PostForm.Get("content")
-	color := r.PostForm.Get("color")
-
-	note, err := nh.repo.Update(r.Context(), id, title, content, color)
+	note, err := nh.repo.GetById(r.Context(), id)
 
 	if err != nil {
 		return err
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/notes/view?id=%d", note.Id.Int), http.StatusSeeOther)
+	if err = render(w, "note-edit.html", dtos.NewNoteRequest(note), http.StatusOK); err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -5,37 +5,9 @@
     <p>{{ .Content }}</p>
 
     <div class="buttons">
-        <button popovertarget="edit-popover" class="info" type="button">Editar</button>
+        <button data-noteid="{{ .Id }}" id="info" class="info" type="button">Editar</button>
         <button data-noteid="{{ .Id }}" id="cancel" class="danger" type="button">Deletar</button>
     </div>
-</div>
-<div class="modal" popover id="edit-popover">
-    <form action="/notes/update?id={{.Id}}" method="post">
-        <fieldset>
-            <label for="title">Título</label>
-            <input type="text" name="title" id="title" />
-        </fieldset>
-
-        <fieldset>
-            <label for="content">Conteúdo</label>
-            <textarea name="content" id="content" cols="30" rows="10"></textarea>
-        </fieldset>
-
-        <fieldset>
-            <label for="color">Cor do Cartão</label>
-            <input type="hidden" name="color" id="color" value="{{ .Color }}" />
-            <div class="color-picker">
-                {{ $color := .Color }}
-                {{ range .Colors }}
-                <div data-color="{{ . }}" class="color {{ . }} {{ if eq . $color }} active {{ end }}"></div>
-                {{ end }}
-            </div>
-        </fieldset>
-
-        <div class="buttons">
-            <button class="success" type="submit">Salvar</button>
-        </div>
-    </form>
 </div>
 {{ end }}
 
@@ -55,10 +27,8 @@
         }
     });
 
-    $(".color").click(function () {
-        $(".color").removeClass("active");
-        $(this).addClass("active");
-        $("#color").val($(this).data("color"));
+    $(".note-view #info").click(function() { 
+        window.location.href = `/notes/update?id=${$(this).data("noteid")}`
     });
 </script>
 {{ end }}

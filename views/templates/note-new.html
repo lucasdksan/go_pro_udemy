@@ -1,15 +1,34 @@
 {{ define "title" }} Create Page {{ . }} {{ end }}
 {{ define "main" }}
     <h1>Nova Anotação</h1>
-    <form action="/notes/create" method="post">
+    <form action="/notes/save" method="post">
+        {{ with .FieldErrors }}
+
+            <ul class="errors">
+                {{ range . }}
+                    <li>{{ . }}</li>
+                {{ end }}
+            </ul>
+
+        {{ end }}
         <fieldset>
             <label for="title">Título</label>
-            <input type="text" name="title" id="title" />
+            {{ with .FieldErrors.title }}
+    
+                <label class="errors">{{ . }}</label>
+
+            {{ end }}
+            <input type="text" name="title" id="title" value="{{ .Title }}" />
         </fieldset>
 
         <fieldset>
             <label for="content">Conteúdo</label>
-            <textarea name="content" id="content" cols="30" rows="10"></textarea>
+            {{ with .FieldErrors.content }}
+            
+                <label class="errors">{{ . }}</label>
+            
+            {{ end }}
+            <textarea name="content" id="content" cols="30" rows="10">{{ - .Content - }}</textarea>
         </fieldset>
 
         <fieldset>
