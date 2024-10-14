@@ -35,6 +35,8 @@ func main() {
 	mux.Handle("/notes/view", handlers.HandlerWithError(noteHandlers.NoteView))
 	mux.Handle("/notes/new", handlers.HandlerWithError(noteHandlers.NoteNew))
 	mux.Handle("/notes/create", handlers.HandlerWithError(noteHandlers.NoteCreate))
+	mux.Handle("/notes/delete", handlers.HandlerWithError(noteHandlers.NoteDelete))
+	mux.Handle("/notes/update", handlers.HandlerWithError(noteHandlers.NoteEdit))
 
 	if err = http.ListenAndServe(port, mux); err != nil {
 		slog.Error("Server Error", "error", err)

@@ -1,7 +1,64 @@
 {{ define "title" }} View Page {{ .Id }} {{ end }}
 {{ define "main" }}
-<div >
+<div class="note-view">
     <h3>Esta é a nota {{ .Title }}</h3>
     <p>{{ .Content }}</p>
+
+    <div class="buttons">
+        <button popovertarget="edit-popover" class="info" type="button">Editar</button>
+        <button data-noteid="{{ .Id }}" id="cancel" class="danger" type="button">Deletar</button>
+    </div>
 </div>
+<div class="modal" popover id="edit-popover">
+    <form action="/notes/update?id={{.Id}}" method="post">
+        <fieldset>
+            <label for="title">Título</label>
+            <input type="text" name="title" id="title" />
+        </fieldset>
+
+        <fieldset>
+            <label for="content">Conteúdo</label>
+            <textarea name="content" id="content" cols="30" rows="10"></textarea>
+        </fieldset>
+
+        <fieldset>
+            <label for="color">Cor do Cartão</label>
+            <input type="hidden" name="color" id="color" value="{{ .Color }}" />
+            <div class="color-picker">
+                {{ $color := .Color }}
+                {{ range .Colors }}
+                <div data-color="{{ . }}" class="color {{ . }} {{ if eq . $color }} active {{ end }}"></div>
+                {{ end }}
+            </div>
+        </fieldset>
+
+        <div class="buttons">
+            <button class="success" type="submit">Salvar</button>
+        </div>
+    </form>
+</div>
+{{ end }}
+
+{{ define "script" }}
+<script>
+    $(".note-view #cancel").click(function (e) {
+        e.stopPropagation();
+
+        if (window.confirm("Tem certeza que deseja deletar essa anotação?")) {
+            $.ajax({
+                url: `/notes/delete?id=${$(this).data("noteid")}`,
+                type: "DELETE",
+                success: function () {
+                    window.location.href = "/";
+                }
+            });
+        }
+    });
+
+    $(".color").click(function () {
+        $(".color").removeClass("active");
+        $(this).addClass("active");
+        $("#color").val($(this).data("color"));
+    });
+</script>
 {{ end }}

@@ -326,6 +326,22 @@
         display: flex;
         justify-content: space-between;
     }
+
+    .modal {
+        top: 50%;
+        width: auto;
+        max-width: 350px;
+        left: 50%;
+        padding: 20px;
+        transform: translate(-50%, -50%);
+        border: none;
+        border-radius: 10px;
+    }
+
+    .modal form {
+        width: 100%;
+        height: auto;
+    }
 }
 
 @layer color-picker {
@@ -341,6 +357,7 @@
 
     .color-picker {
         display: flex;
+        flex-wrap: wrap;
         gap: .5rem;
         margin-block: 6px 16px;
     }

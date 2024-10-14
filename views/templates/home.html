@@ -29,6 +29,20 @@
 
             window.location.href = `notes/view?id=${id}`;
         });
+
+        $(".note a").click(function(e) {  
+            e.stopPropagation();
+
+            if(window.confirm("Tem certeza que deseja deletar essa anotação?")) {
+                $.ajax({
+                    url: `notes/delete?id=${$(this).data("noteid")}`,
+                    type: "DELETE",
+                    success: function() {
+                        window.location.href = "/";
+                    }
+                });
+            }
+        });
     </script>
 
 {{ end }}

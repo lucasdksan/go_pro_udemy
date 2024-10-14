@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"go_pro/internal/apperrors"
@@ -9,7 +8,6 @@ import (
 	"go_pro/internal/repositories"
 	"net/http"
 	"strconv"
-	"text/template"
 )
 
 type noteHandler struct {
@@ -25,25 +23,13 @@ func (nh *noteHandler) NoteList(w http.ResponseWriter, r *http.Request) error {
 		return ErrorNotFound("page not found")
 	}
 
-	files := []string{
-		"views/components/footer.html",
-		"views/components/header.html",
-		"views/components/layout.html",
-		"views/templates/home.html",
-	}
-	t, err := template.ParseFiles(files...)
-
-	if err != nil {
-		return ErrorInternalServer("Error executing this page")
-	}
-
 	notes, err := nh.repo.List(r.Context())
 
 	if err != nil {
 		return err
 	}
 
-	if err = t.ExecuteTemplate(w, "layout", dtos.NewNoteResponseFromNoteList(notes)); err != nil {
+	if err = render(w, "home.html", dtos.NewNoteResponseFromNoteList(notes)); err != nil {
 		return ErrorInternalServer("error in template")
 	}
 
@@ -52,12 +38,6 @@ func (nh *noteHandler) NoteList(w http.ResponseWriter, r *http.Request) error {
 
 func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) error {
 	idParam := r.URL.Query().Get("id")
-	files := []string{
-		"views/components/footer.html",
-		"views/components/header.html",
-		"views/components/layout.html",
-		"views/templates/note-view.html",
-	}
 
 	if idParam == "" {
 		return ErrorBadRequest("note not found")
@@ -69,44 +49,21 @@ func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	t, err := template.ParseFiles(files...)
-
-	if err != nil {
-		return ErrorInternalServer("error executing this page")
-	}
-
 	note, err := nh.repo.GetById(r.Context(), id)
 
 	if err != nil {
 		return err
 	}
 
-	buff := &bytes.Buffer{}
-
-	if err = t.ExecuteTemplate(buff, "layout", dtos.NewNoteResponseFromNote(note)); err != nil {
+	if err = render(w, "note-view.html", dtos.NewNoteCombined(note)); err != nil {
 		return ErrorInternalServer("error in template")
 	}
-
-	buff.WriteTo(w)
 
 	return nil
 }
 
 func (nh *noteHandler) NoteNew(w http.ResponseWriter, r *http.Request) error {
-	files := []string{
-		"views/components/footer.html",
-		"views/components/header.html",
-		"views/components/layout.html",
-		"views/templates/note-new.html",
-	}
-
-	t, err := template.ParseFiles(files...)
-
-	if err != nil {
-		return ErrorInternalServer("error executing this page")
-	}
-
-	if err = t.ExecuteTemplate(w, "layout", dtos.NewNoteRequest()); err != nil {
+	if err := render(w, "note-new.html", dtos.NewNoteRequest()); err != nil {
 		return ErrorInternalServer("error in template")
 	}
 
@@ -129,6 +86,62 @@ func (nh *noteHandler) NoteCreate(w http.ResponseWriter, r *http.Request) error 
 	color := r.PostForm.Get("color")
 
 	note, err := nh.repo.Create(r.Context(), title, content, color)
+
+	if err != nil {
+		return err
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/notes/view?id=%d", note.Id.Int), http.StatusSeeOther)
+
+	return nil
+}
+
+func (nh *noteHandler) NoteDelete(w http.ResponseWriter, r *http.Request) error {
+	if r.Method != http.MethodDelete {
+		w.Header().Set("Allow", http.MethodPost)
+
+		return apperrors.NewWithStatus(errors.New("operation not permitted"), http.StatusInternalServerError)
+	}
+
+	idParam := r.URL.Query().Get("id")
+
+	if idParam == "" {
+		return ErrorBadRequest("note not found")
+	}
+
+	id, err := strconv.Atoi(idParam)
+
+	if err != nil {
+		return err
+	}
+
+	err = nh.repo.Delete(r.Context(), id)
+
+	if err != nil {
+		return ErrorInternalServer("Error deleting note")
+	}
+
+	return nil
+}
+
+func (nh *noteHandler) NoteEdit(w http.ResponseWriter, r *http.Request) error {
+	idParam := r.URL.Query().Get("id")
+
+	if idParam == "" {
+		return ErrorBadRequest("note not found")
+	}
+
+	id, err := strconv.Atoi(idParam)
+
+	if err != nil {
+		return err
+	}
+
+	title := r.PostForm.Get("title")
+	content := r.PostForm.Get("content")
+	color := r.PostForm.Get("color")
+
+	note, err := nh.repo.Update(r.Context(), id, title, content, color)
 
 	if err != nil {
 		return err
