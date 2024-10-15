@@ -1,9 +1,7 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
-	"go_pro/internal/apperrors"
 	"go_pro/internal/dtos"
 	"go_pro/internal/models"
 	"go_pro/internal/repositories"
@@ -39,7 +37,7 @@ func (nh *noteHandler) NoteList(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) error {
-	idParam := r.URL.Query().Get("id")
+	idParam := r.PathValue("id")
 
 	if idParam == "" {
 		return ErrorBadRequest("note not found")
@@ -73,12 +71,6 @@ func (nh *noteHandler) NoteNew(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (nh *noteHandler) NoteSave(w http.ResponseWriter, r *http.Request) error {
-	if r.Method != http.MethodPost {
-		w.Header().Set("Allow", http.MethodPost)
-
-		return apperrors.NewWithStatus(errors.New("operation not permitted"), http.StatusInternalServerError)
-	}
-
 	if err := r.ParseForm(); err != nil {
 		return err
 	}
@@ -122,19 +114,13 @@ func (nh *noteHandler) NoteSave(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/notes/view?id=%d", note.Id.Int), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/notes/%d", note.Id.Int), http.StatusSeeOther)
 
 	return nil
 }
 
 func (nh *noteHandler) NoteDelete(w http.ResponseWriter, r *http.Request) error {
-	if r.Method != http.MethodDelete {
-		w.Header().Set("Allow", http.MethodPost)
-
-		return apperrors.NewWithStatus(errors.New("operation not permitted"), http.StatusInternalServerError)
-	}
-
-	idParam := r.URL.Query().Get("id")
+	idParam := r.PathValue("id")
 
 	if idParam == "" {
 		return ErrorBadRequest("note not found")
@@ -156,7 +142,7 @@ func (nh *noteHandler) NoteDelete(w http.ResponseWriter, r *http.Request) error 
 }
 
 func (nh *noteHandler) NoteEdit(w http.ResponseWriter, r *http.Request) error {
-	idParam := r.URL.Query().Get("id")
+	idParam := r.PathValue("id")
 
 	if idParam == "" {
 		return ErrorBadRequest("note not found")

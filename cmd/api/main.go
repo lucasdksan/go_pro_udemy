@@ -27,16 +27,20 @@ func main() {
 
 	noteRepo := repositories.NewNoteRepository(db)
 	noteHandlers := handlers.NewNoteHandler(noteRepo)
+	userHandlers := handlers.NewUserHandler()
 
 	slog.SetDefault(log)
 	slog.Info(fmt.Sprintf("Servidor rodando na porta %s\n", config.ServerPort))
-	mux.Handle("/assets/", http.StripPrefix("/assets/", staticHandler))
+	mux.Handle("GET /assets/", http.StripPrefix("/assets/", staticHandler))
 	mux.Handle("/", handlers.HandlerWithError(noteHandlers.NoteList))
-	mux.Handle("/notes/view", handlers.HandlerWithError(noteHandlers.NoteView))
-	mux.Handle("/notes/new", handlers.HandlerWithError(noteHandlers.NoteNew))
-	mux.Handle("/notes/save", handlers.HandlerWithError(noteHandlers.NoteSave))
-	mux.Handle("/notes/delete", handlers.HandlerWithError(noteHandlers.NoteDelete))
-	mux.Handle("/notes/update", handlers.HandlerWithError(noteHandlers.NoteEdit))
+	mux.Handle("GET /notes/{id}", handlers.HandlerWithError(noteHandlers.NoteView))
+	mux.Handle("GET /notes/new", handlers.HandlerWithError(noteHandlers.NoteNew))
+	mux.Handle("POST /notes", handlers.HandlerWithError(noteHandlers.NoteSave))
+	mux.Handle("DELETE /notes/{id}", handlers.HandlerWithError(noteHandlers.NoteDelete))
+	mux.Handle("GET /notes/{id}/update", handlers.HandlerWithError(noteHandlers.NoteEdit))
+
+	mux.Handle("GET /user/signup", handlers.HandlerWithError(userHandlers.SignupForm))
+	mux.Handle("POST /user/signup", handlers.HandlerWithError(userHandlers.Signup))
 
 	if err = http.ListenAndServe(port, mux); err != nil {
 		slog.Error("Server Error", "error", err)

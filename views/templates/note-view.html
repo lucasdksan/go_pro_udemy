@@ -18,7 +18,7 @@
 
         if (window.confirm("Tem certeza que deseja deletar essa anotação?")) {
             $.ajax({
-                url: `/notes/delete?id=${$(this).data("noteid")}`,
+                url: `/notes/${$(this).data("noteid")}`,
                 type: "DELETE",
                 success: function () {
                     window.location.href = "/";
@@ -28,7 +28,7 @@
     });
 
     $(".note-view #info").click(function() { 
-        window.location.href = `/notes/update?id=${$(this).data("noteid")}`
+        window.location.href = `/notes/${$(this).data("noteid")}/update`
     });
 </script>
 {{ end }}

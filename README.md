@@ -42,6 +42,8 @@ Curso da Udemy sobre Desenvolvimento Web com Go - Do Zero ao Deploy
     * [Boas Práticas de Logging](/notes/logs.md#boas-práticas-de-logging)
     * [Logging em Ambientes de Produção e Desenvolvimento](/notes/logs.md#logging-em-ambientes-de-produção-e-desenvolvimento)
     * [Integração com Ferramentas de Monitoramento e Observabilidade](/notes/logs.md#integração-com-ferramentas-de-monitoramento-e-observabilidade)
+9. [Observações](#observações)
+10. [Referências](#referências)
 
 ## Introdução
 
@@ -76,3 +78,34 @@ func main() {
 * Usamos http.HandleFunc, que aceita uma função que recebe o http.ResponseWriter para escrever a resposta e o *http.Request para lidar com a requisição.
 
 ## Configurações do Projeto
+
+* Go version 1.23.1
+* Make and Choco
+* Docker
+
+* DataBase:  
+
+```bash 
+    docker compose up
+```
+
+* Server: 
+
+```bash 
+    make server
+```
+
+ou
+
+```bash 
+    go run cmd/api/main.go
+```
+
+## Observações
+
+* **Nome dos arquivos:** Não utilizar {nome}.{sub}.go e sim {nome}_{sub}.go
+
+## Referências
+
+- [Udemy](https://www.udemy.com/course/desenvolvimento-web-com-go-do-zero-ao-deploy/)
+- [Chat GPT](https://chat.openai.com/)

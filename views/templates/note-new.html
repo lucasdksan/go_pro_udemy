@@ -1,7 +1,7 @@
 {{ define "title" }} Create Page {{ . }} {{ end }}
 {{ define "main" }}
     <h1>Nova Anotação</h1>
-    <form action="/notes/save" method="post">
+    <form action="/notes" method="post">
         {{ with .FieldErrors }}
 
             <ul class="errors">
@@ -28,7 +28,7 @@
                 <label class="errors">{{ . }}</label>
             
             {{ end }}
-            <textarea name="content" id="content" cols="30" rows="10">{{ - .Content - }}</textarea>
+            <textarea name="content" id="content" cols="30" rows="10">{{.Content}}</textarea>
         </fieldset>
 
         <fieldset>
