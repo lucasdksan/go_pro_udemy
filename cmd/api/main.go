@@ -26,8 +26,9 @@ func main() {
 	}
 
 	noteRepo := repositories.NewNoteRepository(db)
+	userRepo := repositories.NewUserRepository(db)
 	noteHandlers := handlers.NewNoteHandler(noteRepo)
-	userHandlers := handlers.NewUserHandler()
+	userHandlers := handlers.NewUserHandler(userRepo)
 
 	slog.SetDefault(log)
 	slog.Info(fmt.Sprintf("Servidor rodando na porta %s\n", config.ServerPort))

@@ -2,15 +2,18 @@ package handlers
 
 import (
 	"go_pro/internal/dtos"
+	"go_pro/internal/repositories"
 	"go_pro/tools"
 	"net/http"
 	"strings"
 )
 
-type userHandler struct{}
+type userHandler struct {
+	repo repositories.UserRepository
+}
 
-func NewUserHandler() *userHandler {
-	return &userHandler{}
+func NewUserHandler(repo repositories.UserRepository) *userHandler {
+	return &userHandler{repo: repo}
 }
 
 func (uh *userHandler) SignupForm(w http.ResponseWriter, r *http.Request) error {
@@ -40,5 +43,16 @@ func (uh *userHandler) Signup(w http.ResponseWriter, r *http.Request) error {
 		user.AddFieldError("email", "Email é inválido")
 	}
 
-	return render(w, "user-signup.html", nil, http.StatusOK)
+	user_response, err := uh.repo.Create(r.Context(), user.Email, user.Password)
+
+	if err == repositories.ErrDuplicateEmail {
+		user.AddFieldError("email", "email já está cadastrado")
+		return render(w, "user-signup.html", user, http.StatusUnprocessableEntity)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return render(w, "user-signup-success.html", user_response, http.StatusOK)
 }
