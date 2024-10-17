@@ -43,7 +43,13 @@ func (uh *userHandler) Signup(w http.ResponseWriter, r *http.Request) error {
 		user.AddFieldError("email", "Email é inválido")
 	}
 
-	user_response, err := uh.repo.Create(r.Context(), user.Email, user.Password)
+	hash, err := tools.HashPassword(user.Password)
+
+	if err != nil {
+		return err
+	}
+
+	user_response, err := uh.repo.Create(r.Context(), user.Email, hash)
 
 	if err == repositories.ErrDuplicateEmail {
 		user.AddFieldError("email", "email já está cadastrado")
