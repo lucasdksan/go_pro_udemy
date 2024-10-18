@@ -7,7 +7,7 @@ server:
 	@go run ./cmd/api/main.go
 
 db:
-	@docker compose up -d
+	@docker compose up
 
 migrate-up:
 	@migrate -database ${POSTGRESQL_URL} -path ./migrations up

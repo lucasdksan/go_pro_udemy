@@ -2,6 +2,5 @@
 
 {{ define "main" }}
     <h2>Cadastro realizado com sucesso</h2>
-    <p>Foi enviado um email de confirmação do seu cadastro.</p>
-    <p>Favor conferir seu email para finalizar o seu registro.</p>
+    <a href="/confirmation/{{ . }}">Confirmar</a>
 {{end}}

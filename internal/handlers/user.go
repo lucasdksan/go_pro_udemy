@@ -49,7 +49,9 @@ func (uh *userHandler) Signup(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	user_response, err := uh.repo.Create(r.Context(), user.Email, hash)
+	hashKey := tools.GenerateToken()
+
+	_, token, err := uh.repo.Create(r.Context(), user.Email, hash, hashKey)
 
 	if err == repositories.ErrDuplicateEmail {
 		user.AddFieldError("email", "email já está cadastrado")
@@ -60,5 +62,16 @@ func (uh *userHandler) Signup(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	return render(w, "user-signup-success.html", user_response, http.StatusOK)
+	return render(w, "user-signup-success.html", token, http.StatusOK)
+}
+
+func (uh *userHandler) Confirm(w http.ResponseWriter, r *http.Request) error {
+	token := r.PathValue("token")
+	msg := "Seu cadastro foi confirmado. Agora você já pode fazer o login no sistema."
+
+	if err := uh.repo.ConfirmUserByToken(r.Context(), token); err != nil {
+		msg = "Esse cadastro já foi confirmado ou o token é inválid"
+	}
+
+	return render(w, "user-confirm.html", msg, http.StatusOK)
 }

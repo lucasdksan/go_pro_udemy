@@ -43,6 +43,8 @@ func main() {
 	mux.Handle("GET /user/signup", handlers.HandlerWithError(userHandlers.SignupForm))
 	mux.Handle("POST /user/signup", handlers.HandlerWithError(userHandlers.Signup))
 
+	mux.Handle("GET /confirmation/{token}", handlers.HandlerWithError(userHandlers.Confirm))
+
 	if err = http.ListenAndServe(port, mux); err != nil {
 		slog.Error("Server Error", "error", err)
 		panic("Server Error!")
