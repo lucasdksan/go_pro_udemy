@@ -19,6 +19,7 @@ var ErrInvalidTokenOrUserAlreadyConfirmed = apperrors.NewRepositoryError(errors.
 type UserRepository interface {
 	Create(ctx context.Context, email, password, hashKey string) (*models.User, string, error)
 	ConfirmUserByToken(ctx context.Context, token string) error
+	FindByEmail(ctx context.Context, email string) (*models.User, error)
 }
 
 type userRepository struct {
@@ -94,4 +95,16 @@ func (ur *userRepository) createConfirmationToken(ctx context.Context, user *mod
 	}
 
 	return &userToken, nil
+}
+
+func (ur *userRepository) FindByEmail(ctx context.Context, email string) (*models.User, error) {
+	var user models.User
+
+	row := ur.db.QueryRow(ctx, querys.FindByEmailQuery, email)
+
+	if err := row.Scan(&user.Id, &user.Email, &user.Password, &user.Active); err != nil {
+		return nil, apperrors.NewRepositoryError(err)
+	}
+
+	return &user, nil
 }

@@ -16,4 +16,7 @@ var (
 	UpdateUserConfirmedQuery string = `
 		update users set active = true, updated_at = now() where id = $1;
 	`
+	FindByEmailQuery string = `
+		select id, email, password, active from users where email = $1;
+	`
 )

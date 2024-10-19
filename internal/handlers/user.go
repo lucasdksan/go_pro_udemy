@@ -16,6 +16,54 @@ func NewUserHandler(repo repositories.UserRepository) *userHandler {
 	return &userHandler{repo: repo}
 }
 
+func (uh *userHandler) SigninForm(w http.ResponseWriter, r *http.Request) error {
+	return render(w, "user-signin.html", nil, http.StatusOK)
+}
+
+func (uh *userHandler) Signin(w http.ResponseWriter, r *http.Request) error {
+	if err := r.ParseForm(); err != nil {
+		return err
+	}
+
+	email := r.PostFormValue("email")
+	password := r.PostFormValue("password")
+
+	user := dtos.NewUserRequest(email, password)
+
+	if strings.TrimSpace(user.Password) == "" {
+		user.AddFieldError("password", "Senha é obrigatória")
+	}
+
+	if err := tools.ValidateEmail(user.Email); err != nil {
+		user.AddFieldError("email", "Email é inválido")
+	}
+
+	if !user.Valid() {
+		render(w, "user-signin.html", user, http.StatusUnprocessableEntity)
+		return nil
+	}
+
+	data, err := uh.repo.FindByEmail(r.Context(), user.Email)
+
+	if err != nil {
+		user.AddFieldError("validation", "invalid credentials")
+		return render(w, "user-signin.html", user, http.StatusUnprocessableEntity)
+	}
+
+	if !data.Active.Bool {
+		user.AddFieldError("validation", "user did not confirm registration")
+		return render(w, "user-signin.html", user, http.StatusUnprocessableEntity)
+	}
+
+	if !tools.ValidatePassword(user.Password, data.Password.String) {
+		user.AddFieldError("validation", "invalid credentials")
+		return render(w, "user-signin.html", user, http.StatusUnprocessableEntity)
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+	return nil
+}
+
 func (uh *userHandler) SignupForm(w http.ResponseWriter, r *http.Request) error {
 	return render(w, "user-signup.html", nil, http.StatusOK)
 }
@@ -34,13 +82,17 @@ func (uh *userHandler) Signup(w http.ResponseWriter, r *http.Request) error {
 		user.AddFieldError("password", "Senha é obrigatória")
 	}
 
-	if !user.Valid() {
-		render(w, "user-signup.html", user, http.StatusUnprocessableEntity)
-		return nil
+	if len(strings.TrimSpace(user.Password)) < 6 {
+		user.AddFieldError("password", "Senha precisa ter no mínimo 6 caracteres")
 	}
 
 	if err := tools.ValidateEmail(user.Email); err != nil {
 		user.AddFieldError("email", "Email é inválido")
+	}
+
+	if !user.Valid() {
+		render(w, "user-signup.html", user, http.StatusUnprocessableEntity)
+		return nil
 	}
 
 	hash, err := tools.HashPassword(user.Password)
