@@ -10,6 +10,11 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
+
+	"github.com/alexedwards/scs/pgxstore"
+	"github.com/alexedwards/scs/v2"
+	"github.com/gorilla/csrf"
 )
 
 func main() {
@@ -20,6 +25,12 @@ func main() {
 	port := fmt.Sprintf(":%s", config.ServerPort)
 	db, err := database.LoadDataBase(config.DBConnURL)
 
+	sessionManager := scs.New()
+	sessionManager.Lifetime = time.Hour
+	sessionManager.Store = pgxstore.New(db)
+
+	pgxstore.NewWithCleanupInterval(db, 30*time.Minute)
+
 	if err != nil {
 		slog.Error("Failed connection db", "error", err)
 		panic("Server Error!")
@@ -28,7 +39,7 @@ func main() {
 	noteRepo := repositories.NewNoteRepository(db)
 	userRepo := repositories.NewUserRepository(db)
 	noteHandlers := handlers.NewNoteHandler(noteRepo)
-	userHandlers := handlers.NewUserHandler(userRepo)
+	userHandlers := handlers.NewUserHandler(sessionManager, userRepo)
 
 	slog.SetDefault(log)
 	slog.Info(fmt.Sprintf("Servidor rodando na porta %s\n", config.ServerPort))
@@ -46,7 +57,11 @@ func main() {
 	mux.Handle("POST /user/signin", handlers.HandlerWithError(userHandlers.Signin))
 	mux.Handle("GET /confirmation/{token}", handlers.HandlerWithError(userHandlers.Confirm))
 
-	if err = http.ListenAndServe(port, mux); err != nil {
+	mux.Handle("GET /me", handlers.HandlerWithError(userHandlers.Me))
+
+	csrfMiddleware := csrf.Protect([]byte("32-byte-long-auth-key"))
+
+	if err = http.ListenAndServe(port, sessionManager.LoadAndSave(csrfMiddleware(mux))); err != nil {
 		slog.Error("Server Error", "error", err)
 		panic("Server Error!")
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go_pro/internal/models"
 	"go_pro/internal/validations"
+	"html/template"
 )
 
 type NoteResponse struct {
@@ -14,11 +15,12 @@ type NoteResponse struct {
 }
 
 type NoteRequest struct {
-	Id      int
-	Title   string
-	Content string
-	Color   string
-	Colors  []string
+	Id        int
+	Title     string
+	Content   string
+	Color     string
+	Colors    []string
+	CSRFField template.HTML
 	validations.FormValidator
 }
 

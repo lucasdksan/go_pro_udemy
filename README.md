@@ -109,3 +109,11 @@ ou
 
 - [Udemy](https://www.udemy.com/course/desenvolvimento-web-com-go-do-zero-ao-deploy/)
 - [Chat GPT](https://chat.openai.com/)
+
+
+
+
+Cookies
+Sessions
+CSRF
+SameSite

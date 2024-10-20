@@ -3,11 +3,13 @@ package handlers
 import (
 	"bytes"
 	"fmt"
+	"html/template"
 	"net/http"
-	"text/template"
+
+	"github.com/gorilla/csrf"
 )
 
-func render(w http.ResponseWriter, page string, data interface{}, status int) error {
+func render(w http.ResponseWriter, r *http.Request, page string, data interface{}, status int) error {
 	files := []string{
 		"views/components/footer.html",
 		"views/components/header.html",
@@ -15,8 +17,16 @@ func render(w http.ResponseWriter, page string, data interface{}, status int) er
 	}
 
 	files = append(files, fmt.Sprintf("views/templates/%s", page))
+	t := template.New("").Funcs(template.FuncMap{
+		"csrfField": func() template.HTML {
+			return csrf.TemplateField(r)
+		},
+		"csrfToken": func() string {
+			return csrf.Token(r)
+		},
+	})
 
-	t, err := template.ParseFiles(files...)
+	t, err := t.ParseFiles(files...)
 
 	if err != nil {
 		return ErrorInternalServer("error executing this page")

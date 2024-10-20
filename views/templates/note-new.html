@@ -11,6 +11,7 @@
             </ul>
 
         {{ end }}
+        {{ csrfField }}
         <fieldset>
             <label for="title">Título</label>
             {{ with .FieldErrors.title }}

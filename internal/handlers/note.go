@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/gorilla/csrf"
 )
 
 type noteHandler struct {
@@ -29,7 +31,7 @@ func (nh *noteHandler) NoteList(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	if err = render(w, "home.html", dtos.NewNoteResponseFromNoteList(notes), http.StatusOK); err != nil {
+	if err = render(w, r, "home.html", dtos.NewNoteResponseFromNoteList(notes), http.StatusOK); err != nil {
 		return err
 	}
 
@@ -55,7 +57,7 @@ func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	if err = render(w, "note-view.html", dtos.NewNoteResponseFromNote(note), http.StatusOK); err != nil {
+	if err = render(w, r, "note-view.html", dtos.NewNoteResponseFromNote(note), http.StatusOK); err != nil {
 		return err
 	}
 
@@ -63,7 +65,11 @@ func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (nh *noteHandler) NoteNew(w http.ResponseWriter, r *http.Request) error {
-	if err := render(w, "note-new.html", dtos.NewNoteRequest(nil), http.StatusOK); err != nil {
+	data := dtos.NewNoteRequest(nil)
+
+	data.CSRFField = csrf.TemplateField(r)
+
+	if err := render(w, r, "note-new.html", data, http.StatusOK); err != nil {
 		return err
 	}
 
@@ -93,9 +99,9 @@ func (nh *noteHandler) NoteSave(w http.ResponseWriter, r *http.Request) error {
 
 	if !data.Valid() {
 		if id > 0 {
-			render(w, "note-edit.html", data, http.StatusUnprocessableEntity)
+			render(w, r, "note-edit.html", data, http.StatusUnprocessableEntity)
 		} else {
-			render(w, "note-new.html", data, http.StatusUnprocessableEntity)
+			render(w, r, "note-new.html", data, http.StatusUnprocessableEntity)
 		}
 
 		return nil
@@ -160,7 +166,7 @@ func (nh *noteHandler) NoteEdit(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	if err = render(w, "note-edit.html", dtos.NewNoteRequest(note), http.StatusOK); err != nil {
+	if err = render(w, r, "note-edit.html", dtos.NewNoteRequest(note), http.StatusOK); err != nil {
 		return err
 	}
 

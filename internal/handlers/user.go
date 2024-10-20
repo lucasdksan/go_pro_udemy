@@ -1,23 +1,31 @@
 package handlers
 
 import (
+	"fmt"
 	"go_pro/internal/dtos"
 	"go_pro/internal/repositories"
 	"go_pro/tools"
 	"net/http"
 	"strings"
+
+	"github.com/alexedwards/scs/v2"
 )
 
 type userHandler struct {
-	repo repositories.UserRepository
+	session *scs.SessionManager
+	repo    repositories.UserRepository
 }
 
-func NewUserHandler(repo repositories.UserRepository) *userHandler {
-	return &userHandler{repo: repo}
+func NewUserHandler(session *scs.SessionManager, repo repositories.UserRepository) *userHandler {
+	return &userHandler{repo: repo, session: session}
 }
 
 func (uh *userHandler) SigninForm(w http.ResponseWriter, r *http.Request) error {
-	return render(w, "user-signin.html", nil, http.StatusOK)
+	userId := uh.session.GetInt64(r.Context(), "userId")
+
+	fmt.Println("USER ID: ", userId)
+
+	return render(w, r, "user-signin.html", nil, http.StatusOK)
 }
 
 func (uh *userHandler) Signin(w http.ResponseWriter, r *http.Request) error {
@@ -39,7 +47,7 @@ func (uh *userHandler) Signin(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if !user.Valid() {
-		render(w, "user-signin.html", user, http.StatusUnprocessableEntity)
+		render(w, r, "user-signin.html", user, http.StatusUnprocessableEntity)
 		return nil
 	}
 
@@ -47,25 +55,39 @@ func (uh *userHandler) Signin(w http.ResponseWriter, r *http.Request) error {
 
 	if err != nil {
 		user.AddFieldError("validation", "invalid credentials")
-		return render(w, "user-signin.html", user, http.StatusUnprocessableEntity)
+		return render(w, r, "user-signin.html", user, http.StatusUnprocessableEntity)
 	}
 
 	if !data.Active.Bool {
 		user.AddFieldError("validation", "user did not confirm registration")
-		return render(w, "user-signin.html", user, http.StatusUnprocessableEntity)
+		return render(w, r, "user-signin.html", user, http.StatusUnprocessableEntity)
 	}
 
 	if !tools.ValidatePassword(user.Password, data.Password.String) {
 		user.AddFieldError("validation", "invalid credentials")
-		return render(w, "user-signin.html", user, http.StatusUnprocessableEntity)
+		return render(w, r, "user-signin.html", user, http.StatusUnprocessableEntity)
 	}
+
+	uh.session.Put(r.Context(), "userId", data.Id.Int.Int64())
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 	return nil
 }
 
+func (uh *userHandler) Me(w http.ResponseWriter, r *http.Request) error {
+	cookie, err := r.Cookie("session")
+
+	if err != nil {
+		http.Redirect(w, r, "/user/signin", http.StatusTemporaryRedirect)
+		return nil
+	}
+
+	fmt.Fprintf(w, "Email: %s", cookie.Value)
+	return nil
+}
+
 func (uh *userHandler) SignupForm(w http.ResponseWriter, r *http.Request) error {
-	return render(w, "user-signup.html", nil, http.StatusOK)
+	return render(w, r, "user-signup.html", nil, http.StatusOK)
 }
 
 func (uh *userHandler) Signup(w http.ResponseWriter, r *http.Request) error {
@@ -91,7 +113,7 @@ func (uh *userHandler) Signup(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	if !user.Valid() {
-		render(w, "user-signup.html", user, http.StatusUnprocessableEntity)
+		render(w, r, "user-signup.html", user, http.StatusUnprocessableEntity)
 		return nil
 	}
 
@@ -107,14 +129,14 @@ func (uh *userHandler) Signup(w http.ResponseWriter, r *http.Request) error {
 
 	if err == repositories.ErrDuplicateEmail {
 		user.AddFieldError("email", "email já está cadastrado")
-		return render(w, "user-signup.html", user, http.StatusUnprocessableEntity)
+		return render(w, r, "user-signup.html", user, http.StatusUnprocessableEntity)
 	}
 
 	if err != nil {
 		return err
 	}
 
-	return render(w, "user-signup-success.html", token, http.StatusOK)
+	return render(w, r, "user-signup-success.html", token, http.StatusOK)
 }
 
 func (uh *userHandler) Confirm(w http.ResponseWriter, r *http.Request) error {
@@ -125,5 +147,5 @@ func (uh *userHandler) Confirm(w http.ResponseWriter, r *http.Request) error {
 		msg = "Esse cadastro já foi confirmado ou o token é inválid"
 	}
 
-	return render(w, "user-confirm.html", msg, http.StatusOK)
+	return render(w, r, "user-confirm.html", msg, http.StatusOK)
 }

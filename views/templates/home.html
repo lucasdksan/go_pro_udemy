@@ -37,6 +37,9 @@
                 $.ajax({
                     url: `notes/${$(this).data("noteid")}`,
                     type: "DELETE",
+                    headers: {
+                        "X-CSRF-Token": `{{ csrfToken }}`
+                    },
                     success: function() {
                         window.location.href = "/";
                     }

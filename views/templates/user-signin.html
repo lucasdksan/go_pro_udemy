@@ -3,6 +3,18 @@
 {{ define "main" }}
 <form class="user-form" action="/user/signin" method="post">    
     <h1>Entrar no sistema</h1>
+
+    {{with .FieldErrors}}
+        <ul class="errors">
+        {{range .}}
+            <li>{{.}}</li>
+        {{end}}
+        </ul>
+    {{end}}
+
+
+    {{ csrfField }}
+
     <fieldset>
         <label for="email">E-mail</label>
         <input name="email" type="text" id="email" />
