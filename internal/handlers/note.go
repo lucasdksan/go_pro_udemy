@@ -2,36 +2,41 @@ package handlers
 
 import (
 	"fmt"
+	"go_pro/internal/apperrors"
 	"go_pro/internal/dtos"
 	"go_pro/internal/models"
+	"go_pro/internal/render"
 	"go_pro/internal/repositories"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/gorilla/csrf"
 )
 
 type noteHandler struct {
-	repo repositories.NoteRepository
+	render  *render.RenderTemplate
+	session *scs.SessionManager
+	repo    repositories.NoteRepository
 }
 
-func NewNoteHandler(repo repositories.NoteRepository) *noteHandler {
-	return &noteHandler{repo: repo}
+func NewNoteHandler(render *render.RenderTemplate, session *scs.SessionManager, repo repositories.NoteRepository) *noteHandler {
+	return &noteHandler{repo: repo, render: render, session: session}
+}
+
+func (nh *noteHandler) getUserIdFromSession(r *http.Request) int64 {
+	return nh.session.GetInt64(r.Context(), "userId")
 }
 
 func (nh *noteHandler) NoteList(w http.ResponseWriter, r *http.Request) error {
-	if r.URL.Path != "/" {
-		return ErrorNotFound("page not found")
-	}
-
-	notes, err := nh.repo.List(r.Context())
+	notes, err := nh.repo.List(r.Context(), int(nh.getUserIdFromSession(r)))
 
 	if err != nil {
 		return err
 	}
 
-	if err = render(w, r, "note-home.html", dtos.NewNoteResponseFromNoteList(notes), http.StatusOK); err != nil {
+	if err = nh.render.RenderPage(w, r, "note-home.html", dtos.NewNoteResponseFromNoteList(notes), http.StatusOK); err != nil {
 		return err
 	}
 
@@ -42,7 +47,7 @@ func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) error {
 	idParam := r.PathValue("id")
 
 	if idParam == "" {
-		return ErrorBadRequest("note not found")
+		return apperrors.ErrorBadRequest("note not found")
 	}
 
 	id, err := strconv.Atoi(idParam)
@@ -51,13 +56,13 @@ func (nh *noteHandler) NoteView(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	note, err := nh.repo.GetById(r.Context(), id)
+	note, err := nh.repo.GetById(r.Context(), int(nh.getUserIdFromSession(r)), id)
 
 	if err != nil {
 		return err
 	}
 
-	if err = render(w, r, "note-view.html", dtos.NewNoteResponseFromNote(note), http.StatusOK); err != nil {
+	if err = nh.render.RenderPage(w, r, "note-view.html", dtos.NewNoteResponseFromNote(note), http.StatusOK); err != nil {
 		return err
 	}
 
@@ -69,7 +74,7 @@ func (nh *noteHandler) NoteNew(w http.ResponseWriter, r *http.Request) error {
 
 	data.CSRFField = csrf.TemplateField(r)
 
-	if err := render(w, r, "note-new.html", data, http.StatusOK); err != nil {
+	if err := nh.render.RenderPage(w, r, "note-new.html", data, http.StatusOK); err != nil {
 		return err
 	}
 
@@ -99,9 +104,9 @@ func (nh *noteHandler) NoteSave(w http.ResponseWriter, r *http.Request) error {
 
 	if !data.Valid() {
 		if id > 0 {
-			render(w, r, "note-edit.html", data, http.StatusUnprocessableEntity)
+			nh.render.RenderPage(w, r, "note-edit.html", data, http.StatusUnprocessableEntity)
 		} else {
-			render(w, r, "note-new.html", data, http.StatusUnprocessableEntity)
+			nh.render.RenderPage(w, r, "note-new.html", data, http.StatusUnprocessableEntity)
 		}
 
 		return nil
@@ -111,9 +116,9 @@ func (nh *noteHandler) NoteSave(w http.ResponseWriter, r *http.Request) error {
 	var err error
 
 	if id > 0 {
-		note, err = nh.repo.Update(r.Context(), id, title, content, color)
+		note, err = nh.repo.Update(r.Context(), int(nh.getUserIdFromSession(r)), id, title, content, color)
 	} else {
-		note, err = nh.repo.Create(r.Context(), title, content, color)
+		note, err = nh.repo.Create(r.Context(), int(nh.getUserIdFromSession(r)), title, content, color)
 	}
 
 	if err != nil {
@@ -129,7 +134,7 @@ func (nh *noteHandler) NoteDelete(w http.ResponseWriter, r *http.Request) error 
 	idParam := r.PathValue("id")
 
 	if idParam == "" {
-		return ErrorBadRequest("note not found")
+		return apperrors.ErrorBadRequest("note not found")
 	}
 
 	id, err := strconv.Atoi(idParam)
@@ -138,10 +143,10 @@ func (nh *noteHandler) NoteDelete(w http.ResponseWriter, r *http.Request) error 
 		return err
 	}
 
-	err = nh.repo.Delete(r.Context(), id)
+	err = nh.repo.Delete(r.Context(), int(nh.getUserIdFromSession(r)), id)
 
 	if err != nil {
-		return ErrorInternalServer("Error deleting note")
+		return apperrors.ErrorInternalServer("Error deleting note")
 	}
 
 	return nil
@@ -151,7 +156,7 @@ func (nh *noteHandler) NoteEdit(w http.ResponseWriter, r *http.Request) error {
 	idParam := r.PathValue("id")
 
 	if idParam == "" {
-		return ErrorBadRequest("note not found")
+		return apperrors.ErrorBadRequest("note not found")
 	}
 
 	id, err := strconv.Atoi(idParam)
@@ -160,13 +165,13 @@ func (nh *noteHandler) NoteEdit(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	note, err := nh.repo.GetById(r.Context(), id)
+	note, err := nh.repo.GetById(r.Context(), int(nh.getUserIdFromSession(r)), id)
 
 	if err != nil {
 		return err
 	}
 
-	if err = render(w, r, "note-edit.html", dtos.NewNoteRequest(note), http.StatusOK); err != nil {
+	if err = nh.render.RenderPage(w, r, "note-edit.html", dtos.NewNoteRequest(note), http.StatusOK); err != nil {
 		return err
 	}
 

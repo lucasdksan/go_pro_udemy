@@ -8,18 +8,6 @@ import (
 	"text/template"
 )
 
-var ErrorBadRequest = func(text string) error {
-	return apperrors.NewWithStatus(errors.New(text), http.StatusBadRequest)
-}
-
-var ErrorInternalServer = func(text string) error {
-	return apperrors.NewWithStatus(errors.New(text), http.StatusInternalServerError)
-}
-
-var ErrorNotFound = func(text string) error {
-	return apperrors.NewWithStatus(errors.New(text), http.StatusNotFound)
-}
-
 type HandlerWithError func(w http.ResponseWriter, r *http.Request) error
 
 func (f HandlerWithError) ServeHTTP(w http.ResponseWriter, r *http.Request) {

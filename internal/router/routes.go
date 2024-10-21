@@ -2,6 +2,7 @@ package router
 
 import (
 	"go_pro/internal/handlers"
+	"go_pro/internal/render"
 	"go_pro/internal/repositories"
 	"net/http"
 
@@ -11,14 +12,15 @@ import (
 
 func LoadRoutes(sessionManager *scs.SessionManager, db *pgxpool.Pool, noteRepo repositories.NoteRepository, userRepo repositories.UserRepository) http.Handler {
 	mux := http.NewServeMux()
+	render := render.NewRender(sessionManager)
 	staticHandler := http.FileServer(http.Dir("./assets/"))
-	noteHandlers := handlers.NewNoteHandler(noteRepo)
-	userHandlers := handlers.NewUserHandler(sessionManager, userRepo)
+	noteHandlers := handlers.NewNoteHandler(render, sessionManager, noteRepo)
+	userHandlers := handlers.NewUserHandler(render, sessionManager, userRepo)
 	authMidd := handlers.NewAuthMiddleware(sessionManager)
 
 	mux.Handle("GET /assets/", http.StripPrefix("/assets/", staticHandler))
 
-	mux.HandleFunc("GET /", handlers.HomeHandler)
+	mux.HandleFunc("GET /", handlers.NewHomeHandler(render).HomeHandler)
 
 	mux.Handle("GET /notes", authMidd.RequireAuth(handlers.HandlerWithError(noteHandlers.NoteList)))
 	mux.Handle("GET /notes/{id}", authMidd.RequireAuth(handlers.HandlerWithError(noteHandlers.NoteView)))
@@ -31,6 +33,7 @@ func LoadRoutes(sessionManager *scs.SessionManager, db *pgxpool.Pool, noteRepo r
 	mux.Handle("POST /user/signup", handlers.HandlerWithError(userHandlers.Signup))
 	mux.Handle("GET /user/signin", handlers.HandlerWithError(userHandlers.SigninForm))
 	mux.Handle("POST /user/signin", handlers.HandlerWithError(userHandlers.Signin))
+	mux.Handle("GET /user/signout", handlers.HandlerWithError(userHandlers.Signout))
 
 	mux.Handle("GET /confirmation/{token}", handlers.HandlerWithError(userHandlers.Confirm))
 

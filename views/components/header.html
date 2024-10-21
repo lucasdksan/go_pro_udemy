@@ -6,11 +6,20 @@
     </div>
     <nav>
         <div class="wrapper">
-            <a href="/notes">Home</a>
-            <a href="/notes/new">Adicionar Anotação</a>
+            {{ if isAuthenticated }}
+                <a href="/notes">Home</a>
+                <a href="/notes/new">Adicionar Anotação</a>
+            {{ else }}
+                <a href="/">Home</a>
+            {{ end }}
             <div class="right">
-                <a href="/user/signup">Cadastrar</a>
-                <a href="/user/signin">Entrar</a>
+                {{ if isAuthenticated }}
+                    <a href="/user/signout">Sair</a>
+                    <span class="profile">{{userEmail}}</span>
+                {{ else }}
+                    <a href="/user/signup">Cadastrar</a>
+                    <a href="/user/signin">Entrar</a>
+                {{ end }}
             </div>
         </div>
     </nav>

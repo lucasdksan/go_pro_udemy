@@ -2,20 +2,20 @@ package querys
 
 var (
 	ListNoteQuery string = `
-		select id, title, content, color, created_at, updated_at from notes;
+		select id, title, content, color, created_at, updated_at from notes where user_id = $1;
 	`
 	GetByIdNoteQuery string = `
-		select * from notes where id=$1;
+		select id, title, content, color, created_at, updated_at from notes where id = $1 and user_id = $2;
 	`
 	CreateNoteQuery string = `
-		insert into notes (title, content, color)
-		values ($1, $2, $3)
-		returning id, created_at;
+		INSERT INTO notes (title, content, color, user_id)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, created_at;
 	`
 	UpdateNoteQuery string = `
-		update notes set title = $1, content = coalesce($2, content), color = $3, updated_at = $4 where id = $5;
+		update notes set title = $1, content = coalesce($2, content), color = $3, updated_at = $4 where id = $5 and user_id = $6;
 	`
 	DeleteNoteQuery string = `
-		delete from notes where id = $1;
+		delete from notes where id = $1 and user_id = $2;
 	`
 )

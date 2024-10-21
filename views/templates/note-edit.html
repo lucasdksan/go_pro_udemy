@@ -12,6 +12,7 @@
         </ul>
 
     {{ end }}
+    {{csrfField}}
     <input type="hidden" name="id" value="{{.Id}}">
     <label for="title">Título</label>
     {{ with .FieldErrors.title }}
