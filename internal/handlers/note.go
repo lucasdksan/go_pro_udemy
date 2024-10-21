@@ -31,7 +31,7 @@ func (nh *noteHandler) NoteList(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	if err = render(w, r, "home.html", dtos.NewNoteResponseFromNoteList(notes), http.StatusOK); err != nil {
+	if err = render(w, r, "note-home.html", dtos.NewNoteResponseFromNoteList(notes), http.StatusOK); err != nil {
 		return err
 	}
 

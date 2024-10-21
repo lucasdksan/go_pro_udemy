@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"go_pro/config"
 	"go_pro/internal/database"
-	"go_pro/internal/handlers"
 	"go_pro/internal/loggers"
 	"go_pro/internal/repositories"
+	"go_pro/internal/router"
 	"log/slog"
 	"net/http"
 	"os"
@@ -20,8 +20,6 @@ import (
 func main() {
 	config := config.LoadConfig()
 	log := loggers.NewLogger(os.Stderr, config.GetLevelLog())
-	mux := http.NewServeMux()
-	staticHandler := http.FileServer(http.Dir("./assets/"))
 	port := fmt.Sprintf(":%s", config.ServerPort)
 	db, err := database.LoadDataBase(config.DBConnURL)
 
@@ -38,26 +36,11 @@ func main() {
 
 	noteRepo := repositories.NewNoteRepository(db)
 	userRepo := repositories.NewUserRepository(db)
-	noteHandlers := handlers.NewNoteHandler(noteRepo)
-	userHandlers := handlers.NewUserHandler(sessionManager, userRepo)
 
 	slog.SetDefault(log)
 	slog.Info(fmt.Sprintf("Servidor rodando na porta %s\n", config.ServerPort))
-	mux.Handle("GET /assets/", http.StripPrefix("/assets/", staticHandler))
-	mux.Handle("/", handlers.HandlerWithError(noteHandlers.NoteList))
-	mux.Handle("GET /notes/{id}", handlers.HandlerWithError(noteHandlers.NoteView))
-	mux.Handle("GET /notes/new", handlers.HandlerWithError(noteHandlers.NoteNew))
-	mux.Handle("POST /notes", handlers.HandlerWithError(noteHandlers.NoteSave))
-	mux.Handle("DELETE /notes/{id}", handlers.HandlerWithError(noteHandlers.NoteDelete))
-	mux.Handle("GET /notes/{id}/update", handlers.HandlerWithError(noteHandlers.NoteEdit))
 
-	mux.Handle("GET /user/signup", handlers.HandlerWithError(userHandlers.SignupForm))
-	mux.Handle("POST /user/signup", handlers.HandlerWithError(userHandlers.Signup))
-	mux.Handle("GET /user/signin", handlers.HandlerWithError(userHandlers.SigninForm))
-	mux.Handle("POST /user/signin", handlers.HandlerWithError(userHandlers.Signin))
-	mux.Handle("GET /confirmation/{token}", handlers.HandlerWithError(userHandlers.Confirm))
-
-	mux.Handle("GET /me", handlers.HandlerWithError(userHandlers.Me))
+	mux := router.LoadRoutes(sessionManager, db, noteRepo, userRepo)
 
 	csrfMiddleware := csrf.Protect([]byte("32-byte-long-auth-key"))
 

@@ -70,7 +70,7 @@ func (uh *userHandler) Signin(w http.ResponseWriter, r *http.Request) error {
 
 	uh.session.Put(r.Context(), "userId", data.Id.Int.Int64())
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/notes", http.StatusSeeOther)
 	return nil
 }
 
