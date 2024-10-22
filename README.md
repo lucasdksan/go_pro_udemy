@@ -6,44 +6,45 @@ Curso da Udemy sobre Desenvolvimento Web com Go - Do Zero ao Deploy
 
 # Sumário
 
-1. [Introdução](#introdução)
-2. [Configurações do Projeto](#configurações-do-projeto)
-3. [Mux](/notes/mux.md#mux)
-    * [Manipulando Requisições HTTP no Go](/notes/mux.md#manipulando-requisições-http-no-go)
-4. [Organização de Pastas](/notes/structure.md#organização-de-pastas)
-    * [Importância de uma Estrutura de Pastas](/notes/structure.md#importância-de-uma-estrutura-de-pastas)
-    * [Como Estruturar Pastas de um Projeto](/notes/structure.md#como-estruturar-pastas-de-um-projeto)
-    * [Componentes Importantes](/notes/structure.md#componentes-importantes)
-5. [SSR vs CSR](/notes/side_render.md#server-side-render-vs-client-side-render)
-    * [SSR (Server-Side Rendering)](/notes/side_render.md#ssr-server-side-rendering)
-    * [CSR (Client-Side Rendering)](/notes/side_render.md#csr-client-side-rendering)
-6. [Templates](/notes/template.md#templates)
-    * [O Pacote html/template](/notes/template.md#o-pacote-htmltemplate)
-    * [Reuso de Templates com template](/notes/template.md#reuso-de-templates-com-template)
-    * [Renderização de Dados Dinâmicos](/notes/template.md#renderização-de-dados-dinâmicos)
-    * [Funções Personalizadas nos Templates](/notes/template.md#funções-personalizadas-nos-templates)
-    * [Segurança ao Renderizar HTML](/notes/template.md#segurança-ao-renderizar-html)
-    * [Desempenho e Cache de Templates](/notes/template.md#desempenho-e-cache-de-templates)
-    * [Aplicações com SSR em Golang](/notes/template.md#aplicações-com-ssr-em-golang)
-7. [Configurações](/notes/config.md#configurações)
-    * [Variáveis de Ambiente](/notes/config.md#variáveis-de-ambiente)
-    * [Arquivo .env](/notes/config.md#arquivo-env)
-    * [Arquivos de Configuração JSON](/notes/config.md#arquivos-de-configuração-json)
-    * [Arquivos .properties](/notes/config.md#arquivos-properties)
-    * [Gerenciamento de Configurações por Ambiente (Development, Staging, Production)](/notes/config.md#gerenciamento-de-configurações-por-ambiente-development-staging-production)
-    * [Gerenciamento Avançado com Viper](/notes/config.md#gerenciamento-avançado-com-viper)
-8. [Logs](/notes/logs.md#logs)
-    * [Importância dos Logs](/notes/logs.md#importância-dos-logs)
-    * [Tipos de Logs](/notes/logs.md#tipos-de-logs)
-    * [Ferramentas de Logging no Go](/notes/logs.md#ferramentas-de-logging-no-go)
-        1. [Pacote Padrão log](/notes/logs.md#pacote-padrão-log)
-        2. [Pacote slog (Go 1.21)](/notes/logs.md#pacote-slog-go-121)
-        3. [Pacotes de Logging Populares](/notes/logs.md#pacotes-de-logging-populares)
-    * [Boas Práticas de Logging](/notes/logs.md#boas-práticas-de-logging)
-    * [Logging em Ambientes de Produção e Desenvolvimento](/notes/logs.md#logging-em-ambientes-de-produção-e-desenvolvimento)
-    * [Integração com Ferramentas de Monitoramento e Observabilidade](/notes/logs.md#integração-com-ferramentas-de-monitoramento-e-observabilidade)
-9. [Observações](#observações)
-10. [Referências](#referências)
+* [Introdução](#introdução)
+* [Configurações do Projeto](#configurações-do-projeto)
+* [Mux](/notes/mux.md#mux)
+    1. [Manipulando Requisições HTTP no Go](/notes/mux.md#manipulando-requisições-http-no-go)
+* [Organização de Pastas](/notes/structure.md#organização-de-pastas)
+    1. [Importância de uma Estrutura de Pastas](/notes/structure.md#importância-de-uma-estrutura-de-pastas)
+    2. [Como Estruturar Pastas de um Projeto](/notes/structure.md#como-estruturar-pastas-de-um-projeto)
+    3. [Componentes Importantes](/notes/structure.md#componentes-importantes)
+* [SSR vs CSR](/notes/side_render.md#server-side-render-vs-client-side-render)
+    1. [SSR (Server-Side Rendering)](/notes/side_render.md#ssr-server-side-rendering)
+    2. [CSR (Client-Side Rendering)](/notes/side_render.md#csr-client-side-rendering)
+* [Templates](/notes/template.md#templates)
+    1. [O Pacote html/template](/notes/template.md#o-pacote-htmltemplate)
+    2. [Reuso de Templates com template](/notes/template.md#reuso-de-templates-com-template)
+    3. [Renderização de Dados Dinâmicos](/notes/template.md#renderização-de-dados-dinâmicos)
+    4. [Funções Personalizadas nos Templates](/notes/template.md#funções-personalizadas-nos-templates)
+    5. [Segurança ao Renderizar HTML](/notes/template.md#segurança-ao-renderizar-html)
+    6. [Desempenho e Cache de Templates](/notes/template.md#desempenho-e-cache-de-templates)
+    7. [Aplicações com SSR em Golang](/notes/template.md#aplicações-com-ssr-em-golang)
+* [Configurações](/notes/config.md#configurações)
+    1. [Variáveis de Ambiente](/notes/config.md#variáveis-de-ambiente)
+    2. [Arquivo .env](/notes/config.md#arquivo-env)
+    3. [Arquivos de Configuração JSON](/notes/config.md#arquivos-de-configuração-json)
+    4. [Arquivos .properties](/notes/config.md#arquivos-properties)
+    5. [Gerenciamento de Configurações por Ambiente (Development, Staging, Production)](/notes/config.md#gerenciamento-de-configurações-por-ambiente-development-staging-production)
+    6. [Gerenciamento Avançado com Viper](/notes/config.md#gerenciamento-avançado-com-viper)
+* [Logs](/notes/logs.md#logs)
+    1. [Importância dos Logs](/notes/logs.md#importância-dos-logs)
+    2. [Tipos de Logs](/notes/logs.md#tipos-de-logs)
+    3. [Ferramentas de Logging no Go](/notes/logs.md#ferramentas-de-logging-no-go)
+        * [Pacote Padrão log](/notes/logs.md#pacote-padrão-log)
+        * [Pacote slog (Go 1.21)](/notes/logs.md#pacote-slog-go-121)
+        * [Pacotes de Logging Populares](/notes/logs.md#pacotes-de-logging-populares)
+    4. [Boas Práticas de Logging](/notes/logs.md#boas-práticas-de-logging)
+    5. [Logging em Ambientes de Produção e Desenvolvimento](/notes/logs.md#logging-em-ambientes-de-produção-e-desenvolvimento)
+    6. [Integração com Ferramentas de Monitoramento e Observabilidade](/notes/logs.md#integração-com-ferramentas-de-monitoramento-e-observabilidade)
+* [Cookies e Sessões](/notes/cs.md#cookies)
+* [Observações](#observações)
+* [Referências](#referências)
 
 ## Introdução
 
@@ -83,10 +84,16 @@ func main() {
 * Make and Choco
 * Docker
 
-* DataBase:  
+* Start docker:  
 
 ```bash 
-    docker compose up
+    docker compose up 
+```
+
+ou
+
+```bash 
+    make docker
 ```
 
 * Server: 
@@ -109,12 +116,3 @@ ou
 
 - [Udemy](https://www.udemy.com/course/desenvolvimento-web-com-go-do-zero-ao-deploy/)
 - [Chat GPT](https://chat.openai.com/)
-
-
-
-
-* Cookies
-* Sessions
-* CSRF
-* SameSite
-* emails

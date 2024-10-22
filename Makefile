@@ -6,7 +6,7 @@ POSTGRESQL_URL = ${DB_CONN_URL}
 server:
 	@go run ./cmd/api/main.go
 
-db:
+docker:
 	@docker compose up
 
 migrate-up:
