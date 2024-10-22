@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"go_pro/internal/dtos"
+	"go_pro/internal/mailers"
 	"go_pro/internal/render"
 	"go_pro/internal/repositories"
 	"go_pro/tools"
@@ -17,10 +18,11 @@ type userHandler struct {
 	render  *render.RenderTemplate
 	session *scs.SessionManager
 	repo    repositories.UserRepository
+	mail    mailers.MailService
 }
 
-func NewUserHandler(render *render.RenderTemplate, session *scs.SessionManager, repo repositories.UserRepository) *userHandler {
-	return &userHandler{repo: repo, session: session, render: render}
+func NewUserHandler(render *render.RenderTemplate, session *scs.SessionManager, repo repositories.UserRepository, mail mailers.MailService) *userHandler {
+	return &userHandler{repo: repo, session: session, render: render, mail: mail}
 }
 
 func (uh *userHandler) SigninForm(w http.ResponseWriter, r *http.Request) error {
@@ -144,6 +146,15 @@ func (uh *userHandler) Signup(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
+
+	body := fmt.Sprintf("<a href='http://localhost:5000/confirmation/%s'>Clique aqui para </a>", token)
+
+	uh.mail.Send(mailers.MailMessage{
+		To:      []string{user.Email},
+		Subject: "Confirmação de Cadastro",
+		IsHTML:  true,
+		Body:    []byte(body),
+	})
 
 	return uh.render.RenderPage(w, r, "user-signup-success.html", token, http.StatusOK)
 }

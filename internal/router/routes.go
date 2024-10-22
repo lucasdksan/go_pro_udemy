@@ -2,6 +2,7 @@ package router
 
 import (
 	"go_pro/internal/handlers"
+	"go_pro/internal/mailers"
 	"go_pro/internal/render"
 	"go_pro/internal/repositories"
 	"net/http"
@@ -10,12 +11,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func LoadRoutes(sessionManager *scs.SessionManager, db *pgxpool.Pool, noteRepo repositories.NoteRepository, userRepo repositories.UserRepository) http.Handler {
+func LoadRoutes(sessionManager *scs.SessionManager, db *pgxpool.Pool, noteRepo repositories.NoteRepository, userRepo repositories.UserRepository, mail mailers.MailService) http.Handler {
 	mux := http.NewServeMux()
 	render := render.NewRender(sessionManager)
 	staticHandler := http.FileServer(http.Dir("./assets/"))
 	noteHandlers := handlers.NewNoteHandler(render, sessionManager, noteRepo)
-	userHandlers := handlers.NewUserHandler(render, sessionManager, userRepo)
+	userHandlers := handlers.NewUserHandler(render, sessionManager, userRepo, mail)
 	authMidd := handlers.NewAuthMiddleware(sessionManager)
 
 	mux.Handle("GET /assets/", http.StripPrefix("/assets/", staticHandler))

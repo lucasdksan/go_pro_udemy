@@ -11,9 +11,14 @@ import (
 )
 
 type Config struct {
-	ServerPort string `env:"PORT,3000"`
-	DBConnURL  string `env:"DB_CONN_URL,required"`
-	LevelLog   string `env:"LEVEL_LOG,info"`
+	ServerPort   string `env:"PORT,3000"`
+	DBConnURL    string `env:"DB_CONN_URL,required"`
+	LevelLog     string `env:"LEVEL_LOG,info"`
+	MailHost     string `env:"MAIL_HOST,required"`
+	MailPort     string `env:"MAIL_PORT,required"`
+	MailUsername string `env:"MAIL_USERNAME,required"`
+	MailPassword string `env:"MAIL_PASSWORD,required"`
+	MailFrom     string `env:"MAIL_FROM,quicknotes@quick.com"`
 }
 
 func (c Config) GetLevelLog() slog.Level {

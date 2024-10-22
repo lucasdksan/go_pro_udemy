@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/alexedwards/scs/pgxstore"
@@ -35,18 +36,14 @@ func main() {
 		panic("Server Error!")
 	}
 
-	mailService := mailers.NewSMTPMailService(mailers.SMTPConfig{
-		Host:     "localhost",
-		Port:     1025,
-		Username: "",
-		Password: "",
-		From:     "quicknotes@gmail.com",
-	})
+	mailPort, _ := strconv.Atoi(config.MailPort)
 
-	mailService.Send(mailers.MailMessage{
-		To:      []string{"can@gmail.com"},
-		Subject: "O Sabará Saberá!",
-		Body:    []byte("Esta é uma pagina"),
+	mailService := mailers.NewSMTPMailService(mailers.SMTPConfig{
+		Host:     config.MailHost,
+		Port:     mailPort,
+		Username: config.MailUsername,
+		Password: config.MailPassword,
+		From:     config.MailFrom,
 	})
 
 	noteRepo := repositories.NewNoteRepository(db)
@@ -55,7 +52,7 @@ func main() {
 	slog.SetDefault(log)
 	slog.Info(fmt.Sprintf("Servidor rodando na porta %s\n", config.ServerPort))
 
-	mux := router.LoadRoutes(sessionManager, db, noteRepo, userRepo)
+	mux := router.LoadRoutes(sessionManager, db, noteRepo, userRepo, mailService)
 
 	csrfMiddleware := csrf.Protect([]byte("32-byte-long-auth-key"))
 
