@@ -18,3 +18,8 @@ services:
             interval: 10s
             timeout: 3s
             retries: 3
+    mailhog: 
+        image: mailhog/mailhog
+        ports: 
+            - "1025:1025"
+            - "8025:8025"

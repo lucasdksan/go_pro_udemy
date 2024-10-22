@@ -113,7 +113,8 @@ ou
 
 
 
-Cookies
-Sessions
-CSRF
-SameSite
+* Cookies
+* Sessions
+* CSRF
+* SameSite
+* emails

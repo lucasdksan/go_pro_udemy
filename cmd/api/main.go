@@ -5,6 +5,7 @@ import (
 	"go_pro/config"
 	"go_pro/internal/database"
 	"go_pro/internal/loggers"
+	"go_pro/internal/mailers"
 	"go_pro/internal/repositories"
 	"go_pro/internal/router"
 	"log/slog"
@@ -33,6 +34,20 @@ func main() {
 		slog.Error("Failed connection db", "error", err)
 		panic("Server Error!")
 	}
+
+	mailService := mailers.NewSMTPMailService(mailers.SMTPConfig{
+		Host:     "localhost",
+		Port:     1025,
+		Username: "",
+		Password: "",
+		From:     "quicknotes@gmail.com",
+	})
+
+	mailService.Send(mailers.MailMessage{
+		To:      []string{"can@gmail.com"},
+		Subject: "O Sabará Saberá!",
+		Body:    []byte("Esta é uma pagina"),
+	})
 
 	noteRepo := repositories.NewNoteRepository(db)
 	userRepo := repositories.NewUserRepository(db)
