@@ -12,7 +12,10 @@
         </ul>
     {{end}}
 
-
+    {{ with .Flash }}
+        <p class="sucess">{{ . }}</p>
+    {{ end }}
+    
     {{ csrfField }}
 
     <fieldset>

@@ -3,6 +3,10 @@ export $(shell sed 's/=.*//' .env)
 
 POSTGRESQL_URL = ${DB_CONN_URL}
 
+build:
+	@mkdir -p ./dist
+	@go build -o ./dist/ ./cmd/api/main.go
+
 server:
 	@go run ./cmd/api/main.go
 

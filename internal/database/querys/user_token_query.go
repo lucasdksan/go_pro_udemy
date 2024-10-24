@@ -9,4 +9,8 @@ var (
 	UpdateTokenConfirmedQuery string = `
 		update users_confirmation_tokens set confirmed = true, updated_at = now() where id = $1;
 	`
+	GetUserConfirmationByTokenQuery string = `
+		select id, user_id, token, confirmed, created_at, updated_at from users_confirmation_tokens
+		where token = $1;
+	`
 )

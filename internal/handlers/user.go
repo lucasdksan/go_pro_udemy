@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/alexedwards/scs/v2"
 )
@@ -98,7 +99,10 @@ func (uh *userHandler) Me(w http.ResponseWriter, r *http.Request) error {
 }
 
 func (uh *userHandler) SignupForm(w http.ResponseWriter, r *http.Request) error {
-	return uh.render.RenderPage(w, r, "user-signup.html", nil, http.StatusOK)
+	data := dtos.UserRequest{}
+	data.Flash = uh.session.PopString(r.Context(), "flash")
+
+	return uh.render.RenderPage(w, r, "user-signup.html", data, http.StatusOK)
 }
 
 func (uh *userHandler) Signup(w http.ResponseWriter, r *http.Request) error {
@@ -147,13 +151,17 @@ func (uh *userHandler) Signup(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	body := fmt.Sprintf("<a href='http://localhost:5000/confirmation/%s'>Clique aqui para </a>", token)
+	body, err := uh.render.RenderMailBody("confirmation.html", token)
+
+	if err != nil {
+		return err
+	}
 
 	uh.mail.Send(mailers.MailMessage{
 		To:      []string{user.Email},
 		Subject: "Confirmação de Cadastro",
 		IsHTML:  true,
-		Body:    []byte(body),
+		Body:    body,
 	})
 
 	return uh.render.RenderPage(w, r, "user-signup-success.html", token, http.StatusOK)
@@ -170,6 +178,45 @@ func (uh *userHandler) Confirm(w http.ResponseWriter, r *http.Request) error {
 	return uh.render.RenderPage(w, r, "user-confirm.html", msg, http.StatusOK)
 }
 
+func (uh *userHandler) ForgetPasswordForm(w http.ResponseWriter, r *http.Request) error {
+	return uh.render.RenderPage(w, r, "user-forget-password.html", nil, http.StatusOK)
+}
+
+func (uh *userHandler) ForgetPassword(w http.ResponseWriter, r *http.Request) error {
+	email := r.PostFormValue("email")
+	hashToken := tools.GenerateToken()
+
+	token, err := uh.repo.CreateResetPasswordToken(r.Context(), email, hashToken)
+
+	if err != nil {
+		data := dtos.UserRequest{}
+		data.Email = email
+		data.AddFieldError("email", "Email não possui cadastro válido no sistema")
+		return uh.render.RenderPage(w, r, "user-forget-password.html", data, http.StatusOK)
+	}
+
+	body, err := uh.render.RenderMailBody("forgetpassword.html", map[string]string{"token": token})
+
+	if err != nil {
+		return err
+	}
+
+	err = uh.mail.Send(mailers.MailMessage{
+		To:      []string{email},
+		Subject: "Resetar senha",
+		IsHTML:  true,
+		Body:    body,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	message := "Foi enviado um email com um link para que você possa resetar a sua senha."
+
+	return uh.render.RenderPage(w, r, "generic-success.html", message, http.StatusOK)
+}
+
 func (uh *userHandler) Signout(w http.ResponseWriter, r *http.Request) error {
 	if err := uh.session.RenewToken(r.Context()); err != nil {
 		slog.Error(err.Error())
@@ -179,5 +226,70 @@ func (uh *userHandler) Signout(w http.ResponseWriter, r *http.Request) error {
 	uh.session.Remove(r.Context(), "userId")
 
 	http.Redirect(w, r, "/user/signin", http.StatusSeeOther)
+	return nil
+}
+
+func (uh *userHandler) ResetPasswordForm(w http.ResponseWriter, r *http.Request) error {
+	token := r.PathValue("token")
+
+	userToken, err := uh.repo.GetUserConfirmationByToken(r.Context(), token)
+	elapsedTime := time.Since(userToken.CreatedAt.Time).Hours()
+
+	if err != nil || userToken.Confirmed.Bool || elapsedTime > 4 {
+		msg := "Token inválido ou expirado"
+		return uh.render.RenderPage(w, r, "generic-error.html", msg, http.StatusOK)
+	}
+
+	data := struct {
+		Token  string
+		Errors []string
+	}{
+		Token: token,
+	}
+
+	return uh.render.RenderPage(w, r, "user-reset-password.html", data, http.StatusOK)
+}
+
+func (uh *userHandler) ResetPassword(w http.ResponseWriter, r *http.Request) error {
+	pass := r.PostFormValue("password")
+	token := r.PostFormValue("token")
+
+	hashedPass, err := tools.HashPassword(pass)
+
+	if err != nil {
+		data := struct {
+			Token  string
+			Errors []string
+		}{
+			Token:  token,
+			Errors: []string{"não foi possível alterar a senha"},
+		}
+		return uh.render.RenderPage(w, r, "user-reset-password.html", data, http.StatusOK)
+	}
+
+	email, err := uh.repo.UpdatePasswordByToken(r.Context(), hashedPass, token)
+
+	if err != nil {
+		data := struct {
+			Token  string
+			Errors []string
+		}{
+			Token:  token,
+			Errors: []string{"não foi possível alterar a senha. Solicite uma nova"},
+		}
+
+		return uh.render.RenderPage(w, r, "user-reset-password.html", data, http.StatusOK)
+	}
+
+	uh.session.Put(r.Context(), "flash", "Sua senha foi atualizada. Agora você pode fazer o login")
+
+	uh.mail.Send(mailers.MailMessage{
+		To:      []string{email},
+		Subject: "Sua senha foi atualizada",
+		Body:    []byte("Sua senha foi atualizada e agora você já pode fazer o login novamente"),
+		IsHTML:  false,
+	})
+
+	http.Redirect(w, r, "user/signin", http.StatusSeeOther)
 	return nil
 }

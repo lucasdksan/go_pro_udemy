@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go_pro/internal/apperrors"
 	"html/template"
+	"log/slog"
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
@@ -58,4 +59,22 @@ func (rt *RenderTemplate) RenderPage(w http.ResponseWriter, r *http.Request, pag
 	buff.WriteTo(w)
 
 	return nil
+}
+
+func (rt *RenderTemplate) RenderMailBody(mailTemplate string, data interface{}) ([]byte, error) {
+	t, err := template.ParseFiles("views/mails/" + mailTemplate)
+
+	if err != nil {
+		slog.Error("Error template mails generate", "error ", err.Error())
+		return nil, err
+	}
+
+	buffer := &bytes.Buffer{}
+
+	if err := t.Execute(buffer, data); err != nil {
+		slog.Error("Error template mails generate", "error ", err.Error())
+		return nil, err
+	}
+
+	return buffer.Bytes(), nil
 }

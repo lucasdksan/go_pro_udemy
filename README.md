@@ -108,6 +108,12 @@ ou
     go run cmd/api/main.go
 ```
 
+* Build:
+
+```bash 
+    make build
+```
+
 ## Observações
 
 * **Nome dos arquivos:** Não utilizar {nome}.{sub}.go e sim {nome}_{sub}.go
@@ -116,3 +122,5 @@ ou
 
 - [Udemy](https://www.udemy.com/course/desenvolvimento-web-com-go-do-zero-ao-deploy/)
 - [Chat GPT](https://chat.openai.com/)
+
+* ACID

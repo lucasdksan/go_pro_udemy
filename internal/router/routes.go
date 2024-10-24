@@ -35,6 +35,10 @@ func LoadRoutes(sessionManager *scs.SessionManager, db *pgxpool.Pool, noteRepo r
 	mux.Handle("GET /user/signin", handlers.HandlerWithError(userHandlers.SigninForm))
 	mux.Handle("POST /user/signin", handlers.HandlerWithError(userHandlers.Signin))
 	mux.Handle("GET /user/signout", handlers.HandlerWithError(userHandlers.Signout))
+	mux.Handle("GET /user/forgetpassword", handlers.HandlerWithError(userHandlers.ForgetPasswordForm))
+	mux.Handle("POST /user/forgetpassword", handlers.HandlerWithError(userHandlers.ForgetPassword))
+	mux.Handle("POST /user/password", handlers.HandlerWithError(userHandlers.ResetPassword))
+	mux.Handle("GET /user/password/{token}", handlers.HandlerWithError(userHandlers.ResetPasswordForm))
 
 	mux.Handle("GET /confirmation/{token}", handlers.HandlerWithError(userHandlers.Confirm))
 
