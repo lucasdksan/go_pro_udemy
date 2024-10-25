@@ -1,10 +1,13 @@
 package router
 
 import (
+	"go_pro/assets"
 	"go_pro/internal/handlers"
 	"go_pro/internal/mailers"
 	"go_pro/internal/render"
 	"go_pro/internal/repositories"
+	"io/fs"
+	"log/slog"
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
@@ -12,9 +15,16 @@ import (
 )
 
 func LoadRoutes(sessionManager *scs.SessionManager, db *pgxpool.Pool, noteRepo repositories.NoteRepository, userRepo repositories.UserRepository, mail mailers.MailService) http.Handler {
+	static, err := fs.Sub(assets.Files, ".")
+
+	if err != nil {
+		slog.Error(err.Error())
+		panic(err)
+	}
+
 	mux := http.NewServeMux()
 	render := render.NewRender(sessionManager)
-	staticHandler := http.FileServer(http.Dir("./assets/"))
+	staticHandler := http.FileServerFS(static)
 	noteHandlers := handlers.NewNoteHandler(render, sessionManager, noteRepo)
 	userHandlers := handlers.NewUserHandler(render, sessionManager, userRepo, mail)
 	authMidd := handlers.NewAuthMiddleware(sessionManager)

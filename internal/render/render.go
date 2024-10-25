@@ -2,8 +2,8 @@ package render
 
 import (
 	"bytes"
-	"fmt"
 	"go_pro/internal/apperrors"
+	"go_pro/views"
 	"html/template"
 	"log/slog"
 	"net/http"
@@ -20,14 +20,18 @@ func NewRender(session *scs.SessionManager) *RenderTemplate {
 	return &RenderTemplate{session: session}
 }
 
-func (rt *RenderTemplate) RenderPage(w http.ResponseWriter, r *http.Request, page string, data interface{}, status int) error {
-	files := []string{
-		"views/components/footer.html",
-		"views/components/header.html",
-		"views/components/layout.html",
-	}
+func getTemplatePageFiles(t *template.Template, page string) (*template.Template, error) {
+	return t.ParseFS(views.Files, "components/footer.html", "components/header.html", "components/layout.html", "templates/"+page)
+}
 
-	files = append(files, fmt.Sprintf("views/templates/%s", page))
+func (rt *RenderTemplate) RenderPage(w http.ResponseWriter, r *http.Request, page string, data interface{}, status int) error {
+	// files := []string{
+	// 	"views/components/footer.html",
+	// 	"views/components/header.html",
+	// 	"views/components/layout.html",
+	// }
+
+	// files = append(files, fmt.Sprintf("views/templates/%s", page))
 	t := template.New("").Funcs(template.FuncMap{
 		"csrfField": func() template.HTML {
 			return csrf.TemplateField(r)
@@ -43,7 +47,7 @@ func (rt *RenderTemplate) RenderPage(w http.ResponseWriter, r *http.Request, pag
 		},
 	})
 
-	t, err := t.ParseFiles(files...)
+	t, err := getTemplatePageFiles(t, page)
 
 	if err != nil {
 		return apperrors.ErrorInternalServer("error executing this page")
