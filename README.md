@@ -43,6 +43,7 @@ Curso da Udemy sobre Desenvolvimento Web com Go - Do Zero ao Deploy
     5. [Logging em Ambientes de Produção e Desenvolvimento](/notes/logs.md#logging-em-ambientes-de-produção-e-desenvolvimento)
     6. [Integração com Ferramentas de Monitoramento e Observabilidade](/notes/logs.md#integração-com-ferramentas-de-monitoramento-e-observabilidade)
 * [Cookies e Sessões](/notes/cs.md#cookies)
+* [ACID](/notes/acid.md#acid)
 * [Observações](#observações)
 * [Referências](#referências)
 
@@ -121,7 +122,4 @@ ou
 ## Referências
 
 - [Udemy](https://www.udemy.com/course/desenvolvimento-web-com-go-do-zero-ao-deploy/)
-- [Chat GPT](https://chat.openai.com/)
-
-* ACID
-* Habilitando HTTPS na aplicação com certificados auto assinados
+- [Chat GPT](https://chat.openai.com/)  
