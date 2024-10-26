@@ -124,3 +124,4 @@ ou
 - [Chat GPT](https://chat.openai.com/)
 
 * ACID
+* Habilitando HTTPS na aplicação com certificados auto assinados

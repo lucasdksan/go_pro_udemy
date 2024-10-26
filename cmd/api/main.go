@@ -54,7 +54,12 @@ func main() {
 
 	mux := router.LoadRoutes(sessionManager, db, noteRepo, userRepo, mailService)
 
-	csrfMiddleware := csrf.Protect([]byte("32-byte-long-auth-key"))
+	csrfMiddleware := csrf.Protect([]byte(config.CSRFKey))
+
+	// if err = http.ListenAndServeTLS(port, "cer.cer", "cer.key", sessionManager.LoadAndSave(csrfMiddleware(mux))); err != nil {
+	// 	slog.Error("Server Error", "error", err)
+	// 	panic("Server Error!")
+	// }
 
 	if err = http.ListenAndServe(port, sessionManager.LoadAndSave(csrfMiddleware(mux))); err != nil {
 		slog.Error("Server Error", "error", err)

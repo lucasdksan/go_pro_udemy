@@ -28,31 +28,32 @@ func LoadRoutes(sessionManager *scs.SessionManager, db *pgxpool.Pool, noteRepo r
 	noteHandlers := handlers.NewNoteHandler(render, sessionManager, noteRepo)
 	userHandlers := handlers.NewUserHandler(render, sessionManager, userRepo, mail)
 	authMidd := handlers.NewAuthMiddleware(sessionManager)
+	errorMidd := handlers.NewErrorHandlerMiddleware(render)
 
 	mux.Handle("GET /assets/", http.StripPrefix("/assets/", staticHandler))
 
 	mux.HandleFunc("GET /", handlers.NewHomeHandler(render).HomeHandler)
 
-	mux.Handle("GET /notes", authMidd.RequireAuth(handlers.HandlerWithError(noteHandlers.NoteList)))
-	mux.Handle("GET /notes/{id}", authMidd.RequireAuth(handlers.HandlerWithError(noteHandlers.NoteView)))
-	mux.Handle("GET /notes/new", authMidd.RequireAuth(handlers.HandlerWithError(noteHandlers.NoteNew)))
-	mux.Handle("POST /notes", authMidd.RequireAuth(handlers.HandlerWithError(noteHandlers.NoteSave)))
-	mux.Handle("DELETE /notes/{id}", authMidd.RequireAuth(handlers.HandlerWithError(noteHandlers.NoteDelete)))
-	mux.Handle("GET /notes/{id}/update", authMidd.RequireAuth(handlers.HandlerWithError(noteHandlers.NoteEdit)))
+	mux.Handle("GET /notes", authMidd.RequireAuth(errorMidd.HandlerError(noteHandlers.NoteList)))
+	mux.Handle("GET /notes/{id}", authMidd.RequireAuth(errorMidd.HandlerError(noteHandlers.NoteView)))
+	mux.Handle("GET /notes/new", authMidd.RequireAuth(errorMidd.HandlerError(noteHandlers.NoteNew)))
+	mux.Handle("POST /notes", authMidd.RequireAuth(errorMidd.HandlerError(noteHandlers.NoteSave)))
+	mux.Handle("DELETE /notes/{id}", authMidd.RequireAuth(errorMidd.HandlerError(noteHandlers.NoteDelete)))
+	mux.Handle("GET /notes/{id}/update", authMidd.RequireAuth(errorMidd.HandlerError(noteHandlers.NoteEdit)))
 
-	mux.Handle("GET /user/signup", handlers.HandlerWithError(userHandlers.SignupForm))
-	mux.Handle("POST /user/signup", handlers.HandlerWithError(userHandlers.Signup))
-	mux.Handle("GET /user/signin", handlers.HandlerWithError(userHandlers.SigninForm))
-	mux.Handle("POST /user/signin", handlers.HandlerWithError(userHandlers.Signin))
-	mux.Handle("GET /user/signout", handlers.HandlerWithError(userHandlers.Signout))
-	mux.Handle("GET /user/forgetpassword", handlers.HandlerWithError(userHandlers.ForgetPasswordForm))
-	mux.Handle("POST /user/forgetpassword", handlers.HandlerWithError(userHandlers.ForgetPassword))
-	mux.Handle("POST /user/password", handlers.HandlerWithError(userHandlers.ResetPassword))
-	mux.Handle("GET /user/password/{token}", handlers.HandlerWithError(userHandlers.ResetPasswordForm))
+	mux.Handle("GET /user/signup", errorMidd.HandlerError(userHandlers.SignupForm))
+	mux.Handle("POST /user/signup", errorMidd.HandlerError(userHandlers.Signup))
+	mux.Handle("GET /user/signin", errorMidd.HandlerError(userHandlers.SigninForm))
+	mux.Handle("POST /user/signin", errorMidd.HandlerError(userHandlers.Signin))
+	mux.Handle("GET /user/signout", errorMidd.HandlerError(userHandlers.Signout))
+	mux.Handle("GET /user/forgetpassword", errorMidd.HandlerError(userHandlers.ForgetPasswordForm))
+	mux.Handle("POST /user/forgetpassword", errorMidd.HandlerError(userHandlers.ForgetPassword))
+	mux.Handle("POST /user/password", errorMidd.HandlerError(userHandlers.ResetPassword))
+	mux.Handle("GET /user/password/{token}", errorMidd.HandlerError(userHandlers.ResetPasswordForm))
 
-	mux.Handle("GET /confirmation/{token}", handlers.HandlerWithError(userHandlers.Confirm))
+	mux.Handle("GET /confirmation/{token}", errorMidd.HandlerError(userHandlers.Confirm))
 
-	mux.Handle("GET /me", handlers.HandlerWithError(userHandlers.Me))
+	mux.Handle("GET /me", errorMidd.HandlerError(userHandlers.Me))
 
 	return mux
 }

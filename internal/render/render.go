@@ -2,11 +2,13 @@ package render
 
 import (
 	"bytes"
+	"fmt"
 	"go_pro/internal/apperrors"
 	"go_pro/views"
 	"html/template"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/gorilla/csrf"
@@ -20,18 +22,31 @@ func NewRender(session *scs.SessionManager) *RenderTemplate {
 	return &RenderTemplate{session: session}
 }
 
-func getTemplatePageFiles(t *template.Template, page string) (*template.Template, error) {
-	return t.ParseFS(views.Files, "components/footer.html", "components/header.html", "components/layout.html", "templates/"+page)
+func getTemplatePageFiles(t *template.Template, page string, useFS bool) (*template.Template, error) {
+	if useFS {
+		return t.ParseFS(views.Files, "components/footer.html", "components/header.html", "components/layout.html", "templates/"+page)
+	}
+
+	files := []string{
+		"views/components/footer.html",
+		"views/components/header.html",
+		"views/components/layout.html",
+	}
+
+	files = append(files, fmt.Sprintf("views/templates/%s", page))
+
+	return t.ParseFiles(files...)
+}
+
+func getTemplateMailFiles(mailTmpl string, useFS bool) (*template.Template, error) {
+	if useFS {
+		return template.ParseFS(views.Files, "mails/"+mailTmpl)
+	}
+
+	return template.ParseFiles("views/mails/" + mailTmpl)
 }
 
 func (rt *RenderTemplate) RenderPage(w http.ResponseWriter, r *http.Request, page string, data interface{}, status int) error {
-	// files := []string{
-	// 	"views/components/footer.html",
-	// 	"views/components/header.html",
-	// 	"views/components/layout.html",
-	// }
-
-	// files = append(files, fmt.Sprintf("views/templates/%s", page))
 	t := template.New("").Funcs(template.FuncMap{
 		"csrfField": func() template.HTML {
 			return csrf.TemplateField(r)
@@ -47,7 +62,9 @@ func (rt *RenderTemplate) RenderPage(w http.ResponseWriter, r *http.Request, pag
 		},
 	})
 
-	t, err := getTemplatePageFiles(t, page)
+	useFS := !strings.Contains(r.Host, "localhost")
+
+	t, err := getTemplatePageFiles(t, page, useFS)
 
 	if err != nil {
 		return apperrors.ErrorInternalServer("error executing this page")
@@ -65,8 +82,10 @@ func (rt *RenderTemplate) RenderPage(w http.ResponseWriter, r *http.Request, pag
 	return nil
 }
 
-func (rt *RenderTemplate) RenderMailBody(mailTemplate string, data interface{}) ([]byte, error) {
-	t, err := template.ParseFiles("views/mails/" + mailTemplate)
+func (rt *RenderTemplate) RenderMailBody(r *http.Request, mailTemplate string, data map[string]string) ([]byte, error) {
+	useFS := !strings.Contains(r.Host, "localhost")
+	data["hostAddr"] = "http://" + r.Host
+	t, err := getTemplateMailFiles(mailTemplate, useFS)
 
 	if err != nil {
 		slog.Error("Error template mails generate", "error ", err.Error())

@@ -151,18 +151,21 @@ func (uh *userHandler) Signup(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	body, err := uh.render.RenderMailBody("confirmation.html", token)
+	body, err := uh.render.RenderMailBody(r, "confirmation.html", map[string]string{"token": token})
 
 	if err != nil {
 		return err
 	}
 
-	uh.mail.Send(mailers.MailMessage{
+	if err := uh.mail.Send(mailers.MailMessage{
 		To:      []string{user.Email},
 		Subject: "Confirmação de Cadastro",
 		IsHTML:  true,
 		Body:    body,
-	})
+	}); err != nil {
+		slog.Error(err.Error())
+		return err
+	}
 
 	return uh.render.RenderPage(w, r, "user-signup-success.html", token, http.StatusOK)
 }
@@ -195,7 +198,7 @@ func (uh *userHandler) ForgetPassword(w http.ResponseWriter, r *http.Request) er
 		return uh.render.RenderPage(w, r, "user-forget-password.html", data, http.StatusOK)
 	}
 
-	body, err := uh.render.RenderMailBody("forgetpassword.html", map[string]string{"token": token})
+	body, err := uh.render.RenderMailBody(r, "forgetpassword.html", map[string]string{"token": token})
 
 	if err != nil {
 		return err

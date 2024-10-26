@@ -1,0 +1,2 @@
+dig quicknotes.lucas.dev.br
+reverse_proxy server:5000
